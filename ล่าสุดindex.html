@@ -40,15 +40,26 @@
         th { background: #fce4ec; color: #ad1457; padding: 12px; text-align: left; font-size: 0.8rem; border-bottom: 2px solid #f8bbd0; }
         td { padding: 10px 12px; border-bottom: 1px solid #f0f4f8; font-size: 0.8rem; vertical-align: middle; }
 
-        .add-day-box { display: none; background: var(--soft-purple); padding: 10px; border-radius: 12px; margin-top: 8px; border: 1px dashed #ce93d8; }
+        .add-day-box { 
+            display: none; 
+            background: var(--soft-purple); 
+            padding: 10px; 
+            border-radius: 12px; 
+            margin-top: 8px; 
+            border: 1px dashed #ce93d8;
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .input-mini { width: 70px; padding: 6px; border-radius: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold; }
+        .confirm-mini-btn { background: #ab47bc; color: white; padding: 6px 12px; font-size: 0.7rem; border-radius: 8px; margin-left: 5px; }
 
         button { cursor: pointer; border: none; font-weight: 600; border-radius: 8px; transition: 0.2s; padding: 8px 12px; }
         button:active { transform: scale(0.95); }
         
-        /* ปุ่มจัดการแบบใช้คำตามสั่ง */
-        .btn-add { background: #4caf50; color: white; font-size: 0.75rem; }
-        .btn-perm { background: #7b1fa2; color: white; font-size: 0.75rem; margin-left: 4px; }
-        .btn-del { background: #e53935; color: white; font-size: 0.75rem; margin-left: 4px; }
+        .plus-btn { background: #4caf50; color: white; font-size: 0.75rem; padding: 6px 10px; }
+        .perm-btn { background: #7b1fa2; color: white; font-size: 0.75rem; padding: 6px 10px; margin-left: 4px; }
+        .del-btn { background: #e53935; color: white; font-size: 0.75rem; padding: 6px 10px; margin-left: 4px; }
         
         .kick-btn { background: #ffb74d; color: white; }
         .ban-btn { background: #ff5252; color: white; margin-left: 4px; }
@@ -70,10 +81,10 @@
         .login-card { background: white; width: 100%; max-width: 350px; padding: 30px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; }
         .login-card input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 15px; text-align: center; font-size: 1rem; }
         
-        .perm-text { color: #7b1fa2; font-weight: bold; }
         .expired-text { color: #ff5252; font-weight: bold; }
         .valid-text { color: #2e7d32; font-weight: bold; }
-        #logoutBtn { background: #90a4ae; color: white; padding: 12px; width: 100%; margin-top: 10px; border-radius: 12px; }
+        .perm-text { color: #7b1fa2; font-weight: bold; }
+        #logoutBtn { background: #90a4ae; color: white; padding: 12px; width: 100%; margin-top: 10px; border-radius: 12px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -97,14 +108,14 @@
     </div>
 
     <div class="card">
-        <h3 style="color: var(--primary-blue);">✨ สร้างและจัดการรหัส</h3>
+        <h3 style="color: var(--primary-blue);">✨ สร้างและต่ออายุรหัส</h3>
         <div style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;">
             <input id="newCodeInput" type="text" placeholder="ชื่อรหัสใหม่..." style="flex: 2; min-width: 150px; padding: 12px; border-radius: 12px; border: 1px solid #bbdefb; outline: none;">
             <button class="add-btn" onclick="addNewCode(false)">➕ สร้าง (30วัน)</button>
             <button class="add-perm-btn" onclick="addNewCode(true)">♾️ สร้างรหัสถาวร</button>
         </div>
         
-        <div class="table-wrapper">
+        <div class="table-wrapper" style="max-height: 450px;">
             <table>
                 <thead>
                     <tr><th>ชื่อรหัส</th><th>วันหมดอายุ / สถานะ</th><th align="right">จัดการ</th></tr>
@@ -112,11 +123,6 @@
                 <tbody id="customCodeTableBody"></tbody>
             </table>
         </div>
-    </div>
-
-    <div class="card">
-        <h3 style="color: var(--primary-blue);">📊 ตรวจสอบรายชื่อทั้งหมด</h3>
-        <div id="codeStatusGrid" class="code-status-grid"></div>
     </div>
 
     <div class="card">
@@ -131,22 +137,11 @@
         </div>
     </div>
 
-    <div class="card">
-        <h3 style="color:#c62828;">🚫 รายการที่ถูกแบน (Blacklist)</h3>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr><th>ข้อมูล</th><th>จัดการ</th></tr>
-                </thead>
-                <tbody id="banListTableBody"></tbody>
-            </table>
-        </div>
-    </div>
-
     <button id="logoutBtn" onclick="doLogout()">ออกจากระบบแอดมิน</button>
 </div>
 
 <script>
+// --- CONFIG FIREBASE ---
 const firebaseConfig = {
     apiKey: "AIzaSyC1iAT_0vKk6Uew2VJtN3_wx4JszVTTTjY",
     authDomain: "junior-nior.firebaseapp.com",
@@ -160,14 +155,16 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 const ADMIN_PASS = "adminwinjuniorkmcn0602";
-const PERM_VAL = 32503680000000; 
+const PERM_VAL = 32503680000000; // ค่าสำหรับสถานะถาวร
 
 function doLogin() {
     const p = document.getElementById("userPass").value;
     if(p === ADMIN_PASS) { sessionStorage.setItem("isAdminActive", "true"); checkAuth(); }
     else { alert("รหัสผ่านไม่ถูกต้อง!"); }
 }
+
 function doLogout() { sessionStorage.clear(); location.reload(); }
+
 function checkAuth() {
     if(sessionStorage.getItem("isAdminActive") === "true") {
         document.getElementById("loginOverlay").style.display = "none";
@@ -179,23 +176,27 @@ function checkAuth() {
 function loadData() {
     db.ref().on('value', (snapshot) => {
         const data = snapshot.val() || {};
-        const online = data.online_users || {};
         const custom = data.custom_codes || {};
-        const blacklist = data.blacklist || {};
+        const online = data.online_users || {};
 
-        // 1. ตารางรหัส
+        // 1. แสดงตารางรหัสทั้งหมด
         const customTbody = document.getElementById("customCodeTableBody");
         customTbody.innerHTML = "";
-        Object.keys(custom).forEach(code => {
-            const exp = custom[code].expireAt;
-            const isPerm = exp >= PERM_VAL;
-            const diff = exp - Date.now();
+        Object.keys(custom).sort().forEach(code => {
+            const expTime = custom[code].expireAt;
+            const isPerm = expTime >= PERM_VAL;
+            const diff = expTime - Date.now();
             const isExpired = !isPerm && diff <= 0;
             
-            let statusHtml = isPerm 
-                ? `<div class="perm-text">♾️ถาวร♾️</div>`
-                : `<div class="${isExpired ? 'expired-text' : 'valid-text'}">${new Date(exp).toLocaleDateString('th-TH')}</div>
-                   <div style="font-size:0.7rem; color:#666;">${isExpired ? '🔴 หมดอายุ' : '🟢 เหลือ '+Math.ceil(diff/86400000)+' วัน'}</div>`;
+            let statusHtml = "";
+            if(isPerm) {
+                statusHtml = `<div class="perm-text">♾️ถาวร♾️</div>`;
+            } else {
+                const dayLeft = Math.ceil(diff/(1000*60*60*24));
+                statusHtml = `
+                    <div class="${isExpired ? 'expired-text' : 'valid-text'}">${new Date(expTime).toLocaleDateString('th-TH')}</div>
+                    <div style="font-size:0.7rem; color:#666;">${isExpired ? 'หมดอายุแล้ว' : 'เหลือ '+dayLeft+' วัน'}</div>`;
+            }
 
             customTbody.innerHTML += `
                 <tr>
@@ -203,27 +204,21 @@ function loadData() {
                     <td>
                         ${statusHtml}
                         <div id="box-${code}" class="add-day-box">
-                             <input type="number" id="input-${code}" style="width:50px" value="30">
-                             <button onclick="saveNewDays('${code}')" style="background:#ab47bc; color:white; font-size:10px;">ตกลง</button>
+                             <input type="number" id="input-${code}" class="input-mini" value="30">
+                             <button class="confirm-mini-btn" onclick="saveNewDays('${code}')">ตกลง</button>
                         </div>
                     </td>
                     <td align="right">
-                        <button class="btn-add" onclick="toggleAddDay('${code}')">🗓 เพิ่มวัน</button>
-                        <button class="btn-perm" onclick="togglePermanent('${code}', ${isPerm})">${isPerm ? '🔓 ยกเลิกถาวร' : '♾️ถาวร♾️'}</button>
-                        <button class="btn-del" onclick="deleteCode('${code}')">🗑️ ลบ</button>
+                        <button class="plus-btn" onclick="toggleAddDay('${code}')">➕ต่ออายุ</button>
+                        <button class="perm-btn" style="background:${isPerm ? '#9e9e9e':'#7b1fa2'}" onclick="togglePermanent('${code}', ${isPerm})">
+                            ${isPerm ? '🔓ยกเลิก' : '♾️ถาวร'}
+                        </button>
+                        <button class="del-btn" onclick="deleteCode('${code}')">❗ลบ</button>
                     </td>
                 </tr>`;
         });
 
-        // 2. Grid สถานะ
-        const grid = document.getElementById("codeStatusGrid");
-        grid.innerHTML = "";
-        Object.keys(custom).forEach(code => {
-            const isOnline = online[code] && online[code].status === 'online';
-            grid.innerHTML += `<div class="code-badge ${isOnline ? 'active' : ''}">${code}</div>`;
-        });
-
-        // 3. ยูสเซอร์ออนไลน์
+        // 2. แสดงตารางคนออนไลน์
         const onlineTbody = document.getElementById("onlineListTableBody");
         onlineTbody.innerHTML = "";
         Object.keys(online).forEach(key => {
@@ -231,45 +226,35 @@ function loadData() {
             onlineTbody.innerHTML += `
                 <tr>
                     <td><strong>${u.name || 'N/A'}</strong></td>
-                    <td>${u.pass || 'N/A'}</td>
+                    <td>${u.pass || key}</td>
                     <td><span class="dot ${u.status === 'online' ? 'online' : 'offline'}"></span></td>
-                    <td>
-                        <button class="kick-btn" onclick="kickUser('${key}')">เตะ</button>
-                        <button class="ban-btn" onclick="banUser('${u.deviceId}','${key}')">แบน</button>
-                    </td>
+                    <td><button class="kick-btn" onclick="kickUser('${key}')">เตะ</button></td>
                 </tr>`;
-        });
-
-        // 4. รายการแบน
-        const banTbody = document.getElementById("banListTableBody");
-        banTbody.innerHTML = "";
-        Object.keys(blacklist).forEach(id => {
-            banTbody.innerHTML += `<tr>
-                <td><small>${id}</small><br><b>แบนจากรหัส: ${blacklist[id].code}</b></td>
-                <td><button class="unban-btn" onclick="unbanUser('${id}')">ปลดแบน</button></td>
-            </tr>`;
         });
     });
 }
 
-// --- Logic Functions ---
-window.addNewCode = (isPerm) => {
-    const code = document.getElementById("newCodeInput").value.trim();
-    if(!code) return alert("กรุณาใส่รหัส");
-    const exp = isPerm ? PERM_VAL : Date.now() + (30 * 86400000);
-    db.ref('custom_codes/' + code).set({ expireAt: exp, createdAt: Date.now() });
-    document.getElementById("newCodeInput").value = "";
-};
+// --- ฟังก์ชันการจัดการ ---
 
-window.deleteCode = (code) => {
-    if(confirm(`ลบรหัส [${code}]?`)) {
-        db.ref('custom_codes/' + code).remove();
-        db.ref('online_users/' + code).remove();
+window.deleteCode = (code) => { 
+    if(confirm(`ยืนยันการลบรหัส [${code}]?\nยูสเซอร์จะถูกเตะออกทันที!`)) {
+        // ลบทั้งรหัสและชื่อในรายการออนไลน์เพื่อให้เด้งออก
+        db.ref('custom_codes/' + code).remove(); 
+        db.ref('online_users/' + code).remove(); 
     }
 };
 
+window.addNewCode = (isPermanent) => {
+    const code = document.getElementById("newCodeInput").value.trim();
+    if(!code) return alert("กรุณาใส่ชื่อรหัส");
+    const exp = isPermanent ? PERM_VAL : Date.now() + (30 * 24 * 60 * 60 * 1000);
+    db.ref('custom_codes/' + code).set({ expireAt: exp, createdAt: Date.now() }).then(() => {
+        document.getElementById("newCodeInput").value = "";
+    });
+};
+
 window.togglePermanent = (code, currentIsPerm) => {
-    let newExp = currentIsPerm ? Date.now() + (30 * 86400000) : PERM_VAL;
+    let newExp = currentIsPerm ? Date.now() + (30 * 24 * 60 * 60 * 1000) : PERM_VAL;
     db.ref('custom_codes/' + code).update({ expireAt: newExp });
 };
 
@@ -280,26 +265,18 @@ window.toggleAddDay = (code) => {
 
 window.saveNewDays = (code) => {
     const days = document.getElementById(`input-${code}`).value;
-    if(!days) return;
-    db.ref('custom_codes/' + code).once('value', s => {
-        let cur = s.val().expireAt;
-        if(cur >= PERM_VAL || cur < Date.now()) cur = Date.now();
-        db.ref('custom_codes/' + code).update({ expireAt: cur + (parseInt(days) * 86400000) });
-        document.getElementById(`box-${code}`).style.display = 'none';
-    });
-};
-
-window.kickUser = (key) => db.ref('online_users/' + key).remove();
-
-window.banUser = (deviceId, key) => {
-    if(!deviceId || deviceId === "undefined") return alert("ไม่พบ ID เครื่อง");
-    if(confirm(`แบนเครื่องนี้ถาวร?`)) {
-        db.ref('blacklist/' + deviceId).set({ code: key, date: Date.now() });
-        db.ref('online_users/' + key).remove();
+    if(days && !isNaN(days)) {
+        const daysInMs = parseInt(days) * 24 * 60 * 60 * 1000;
+        db.ref('custom_codes/' + code).once('value', (snap) => {
+            let currentExp = snap.exists() ? snap.val().expireAt : Date.now();
+            if (currentExp >= PERM_VAL || currentExp < Date.now()) currentExp = Date.now();
+            db.ref('custom_codes/' + code).update({ expireAt: currentExp + daysInMs });
+            document.getElementById(`box-${code}`).style.display = 'none';
+        });
     }
 };
 
-window.unbanUser = (id) => db.ref('blacklist/' + id).remove();
+window.kickUser = (key) => { if(confirm(`เตะยูสเซอร์ [${key}]?`)) db.ref('online_users/' + key).remove(); };
 
 checkAuth();
 </script>
