@@ -34,7 +34,6 @@
         .card { background: #fff; border-radius: 20px; padding: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #bbdefb; }
         .card h3 { margin-top: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
         
-        /* Grid สำหรับดูรหัสทั้งหมด */
         .code-status-grid { 
             display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); 
             gap: 6px; margin: 10px 0; max-height: 150px; overflow-y: auto; 
@@ -45,16 +44,17 @@
         .code-badge.idle { background: #fff; color: #bbb; }
 
         .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 400px; }
-        th { background: #fce4ec; color: #ad1457; padding: 12px; text-align: left; font-size: 0.85rem; border-bottom: 2px solid #f8bbd0; }
-        td { padding: 12px; border-bottom: 1px solid #f0f4f8; font-size: 0.85rem; }
+        table { width: 100%; border-collapse: collapse; min-width: 450px; }
+        th { background: #fce4ec; color: #ad1457; padding: 12px; text-align: left; font-size: 0.8rem; border-bottom: 2px solid #f8bbd0; }
+        td { padding: 10px 12px; border-bottom: 1px solid #f0f4f8; font-size: 0.8rem; }
 
         button { cursor: pointer; border: none; font-weight: 600; border-radius: 8px; transition: 0.2s; padding: 8px 12px; }
         button:active { transform: scale(0.95); }
         .kick-btn { background: #ffb74d; color: white; }
         .ban-btn { background: #ff5252; color: white; margin-left: 4px; }
         .unban-btn { background: #40c4ff; color: white; width: 100%; }
-        .del-btn { background: #90a4ae; color: white; padding: 5px 10px; font-size: 0.75rem; }
+        .del-btn { background: #90a4ae; color: white; padding: 5px 8px; font-size: 0.7rem; }
+        .plus-btn { background: #4caf50; color: white; padding: 5px 8px; font-size: 0.7rem; margin-right: 4px; }
         .add-btn { background: var(--primary-blue); color: white; padding: 12px 20px; border-radius: 12px; }
         .login-btn { background: linear-gradient(90deg, #2196f3, #ff4081); color: white; width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 15px; }
 
@@ -67,6 +67,8 @@
         .login-card input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 15px; text-align: center; font-size: 1rem; }
 
         #logoutBtn { background: #90a4ae; color: white; padding: 12px; width: 100%; margin-top: 10px; border-radius: 12px; font-size: 0.9rem; }
+        .expired-text { color: #ff5252; font-weight: bold; }
+        .valid-text { color: #2e7d32; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -90,13 +92,16 @@
     </div>
 
     <div class="card">
-        <h3 style="color: var(--primary-blue);">➕ เพิ่มรหัสเข้าใช้งานใหม่</h3>
+        <h3 style="color: var(--primary-blue);">➕ เพิ่มรหัสใหม่ (เริ่มต้น 30 วัน)</h3>
         <div style="display: flex; gap: 8px;">
             <input id="newCodeInput" type="text" placeholder="พิมพ์ชื่อรหัสที่ต้องการ" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #bbdefb; outline: none;">
             <button class="add-btn" onclick="addNewCode()">สร้างรหัส</button>
         </div>
-        <div class="table-wrapper" style="margin-top: 10px; max-height: 150px;">
+        <div class="table-wrapper" style="margin-top: 15px; max-height: 250px;">
             <table>
+                <thead>
+                    <tr><th>รหัส</th><th>หมดอายุ</th><th>จัดการ</th></tr>
+                </thead>
                 <tbody id="customCodeTableBody"></tbody>
             </table>
         </div>
@@ -148,7 +153,6 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const ADMIN_PASS = "adminwinjuniorkmcn0602";
 
-// รหัสถาวร
 const USER_CODES = ["winju0101","juwin0202","jujuwin0303","lekwinju0404","winlek0505","jueiei0606","juny0707","niorwin0808","winnior0909","winarrai1010","lnwwinju1111","julnwwin1212","asdf1313","zxcv1414","qwer1616","popo1717","ziber1818","fahsai1919","kaimook2020","rich9999","gold8888","lucky789","money168","winwin24","star555","smile11","power88","bestwin9","junior007"];
 
 function doLogin() {
@@ -156,15 +160,10 @@ function doLogin() {
     if(p === ADMIN_PASS) {
         sessionStorage.setItem("isAdminActive", "true");
         checkAuth();
-    } else {
-        alert("รหัสผ่านไม่ถูกต้อง!");
-    }
+    } else { alert("รหัสผ่านไม่ถูกต้อง!"); }
 }
 
-function doLogout() {
-    sessionStorage.clear();
-    location.reload();
-}
+function doLogout() { sessionStorage.clear(); location.reload(); }
 
 function checkAuth() {
     if(sessionStorage.getItem("isAdminActive") === "true") {
@@ -181,14 +180,26 @@ function loadData() {
         const custom = data.custom_codes || {};
         const blacklist = data.blacklist || {};
 
-        // 1. ตารางรหัสสร้างเอง (ลบได้)
+        // 1. ตารางรหัสสร้างเอง + วันหมดอายุ
         const customTbody = document.getElementById("customCodeTableBody");
         customTbody.innerHTML = "";
         Object.keys(custom).forEach(code => {
-            customTbody.innerHTML += `<tr><td><strong>${code}</strong></td><td align="right"><button class="del-btn" onclick="deleteCode('${code}')">ลบ</button></td></tr>`;
+            const expTime = custom[code].expireAt;
+            const isExpired = Date.now() > expTime;
+            const dateStr = new Date(expTime).toLocaleDateString('th-TH');
+            
+            customTbody.innerHTML += `
+                <tr>
+                    <td><strong>${code}</strong></td>
+                    <td class="${isExpired ? 'expired-text' : 'valid-text'}">${dateStr}</td>
+                    <td align="right">
+                        <button class="plus-btn" onclick="addDays('${code}')">+30 วัน</button>
+                        <button class="del-btn" onclick="deleteCode('${code}')">ลบ</button>
+                    </td>
+                </tr>`;
         });
 
-        // 2. Grid ดูสถานะรหัสทั้งหมด
+        // 2. Grid ดูสถานะ
         const grid = document.getElementById("codeStatusGrid");
         grid.innerHTML = "";
         const allCodes = [...USER_CODES, ...Object.keys(custom)];
@@ -211,8 +222,7 @@ function loadData() {
                         <button class="kick-btn" onclick="kickUser('${key}')">เตะ</button>
                         <button class="ban-btn" onclick="banUser('${u.deviceId}','${key}')">แบน</button>
                     </td>
-                </tr>
-            `;
+                </tr>`;
         });
 
         // 4. Blacklist
@@ -223,8 +233,7 @@ function loadData() {
                 <tr>
                     <td style="word-break: break-all;">${id}</td>
                     <td><button class="unban-btn" onclick="unbanUser('${id}')">ปลดแบน</button></td>
-                </tr>
-            `;
+                </tr>`;
         });
     });
 }
@@ -233,14 +242,24 @@ function loadData() {
 window.addNewCode = () => {
     const code = document.getElementById("newCodeInput").value.trim();
     if(code) {
-        db.ref('custom_codes/' + code).set(true).then(() => {
+        const expireAt = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 วัน
+        db.ref('custom_codes/' + code).set({ expireAt: expireAt }).then(() => {
             document.getElementById("newCodeInput").value = "";
         });
     }
 };
 
+window.addDays = (code) => {
+    db.ref('custom_codes/' + code).once('value', (snap) => {
+        let currentExp = snap.val().expireAt;
+        if (currentExp < Date.now()) currentExp = Date.now(); // ถ้าหมดอายุแล้ว ให้เริ่มนับใหม่จากวันนี้
+        const newExp = currentExp + (30 * 24 * 60 * 60 * 1000);
+        db.ref('custom_codes/' + code).update({ expireAt: newExp });
+    });
+};
+
 window.deleteCode = (code) => {
-    if(confirm(`ต้องการลบรหัส [${code}]? สมาชิกที่ใช้อยู่จะเข้าไม่ได้ทันที`)) {
+    if(confirm(`ต้องการลบรหัส [${code}]?`)) {
         db.ref('custom_codes/' + code).remove();
         db.ref('online_users/' + code).remove();
     }
