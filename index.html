@@ -43,7 +43,6 @@
         th { background: #fce4ec; color: #ad1457; padding: 12px; text-align: left; font-size: 0.75rem; }
         td { padding: 12px; border-bottom: 1px solid #f0f4f8; font-size: 0.85rem; vertical-align: middle; }
 
-        /* จุดสถานะ - แสดงแค่จุดตามสั่ง */
         .dot { height: 15px; width: 15px; border-radius: 50%; display: inline-block; }
         .dot-online { background-color: #4caf50; box-shadow: 0 0 10px #4caf50; }
         .dot-offline { background-color: #ff5252; box-shadow: 0 0 10px #ff5252; }
@@ -150,7 +149,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 const ADMIN_PASS = "adminwinjuniorkmcn0602";
-const PERM_VAL = 32503680000000;
+const PERM_VAL = 32503680000000; // ค่าสำหรับถาวร
 const USER_CODES = ["winju0101","juwin0202","jujuwin0303","lekwinju0404","winlek0505","jueiei0606","juny0707","niorwin0808","winnior0909","winarrai1010","lnwwinju1111","julnwwin1212","asdf1313","zxcv1414","qwer1616","popo1717","ziber1818","fahsai1919","kaimook2020","rich9999","gold8888","lucky789","money168","winwin24","star555","smile11","power88","bestwin9","junior007"];
 
 function doLogin() { if(document.getElementById("userPass").value === ADMIN_PASS) { sessionStorage.setItem("isAdminActive", "true"); checkAuth(); } else { alert("รหัสผ่านไม่ถูกต้อง!"); } }
@@ -167,13 +166,34 @@ function loadData() {
         customTbody.innerHTML = "";
         Object.keys(custom).sort().forEach(code => {
             const exp = custom[code].expireAt;
-            const isPerm = exp >= PERM_VAL;
+            const isPerm = exp >= 3000000000000; // ตรวจสอบว่าเป็นแบบถาวรหรือไม่ (ใช้ค่าที่มากกว่าปี 2090)
+            
+            let statusHTML = "";
+            if (isPerm) {
+                // แก้ไขให้หน้าแอดมินแสดง ♾️ถาวร♾️
+                statusHTML = '<span style="color:#7b1fa2; font-weight:bold;">♾️ ถาวร ♾️</span>';
+            } else {
+                const diffTime = exp - Date.now();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const dateString = new Date(exp).toLocaleDateString('th-TH', {
+                    day: '2-digit', month: '2-digit', year: '2-digit'
+                });
+
+                if (diffDays > 0) {
+                    statusHTML = `เหลือ <span style="color:#2e7d32; font-weight:bold;">${diffDays} วัน</span><br>` + 
+                                 `<small style="color:#666;">(ใช้ได้ถึง ${dateString})</small>`;
+                } else {
+                    statusHTML = `<span style="color:#c62828; font-weight:bold;">❌ หมดอายุแล้ว</span><br>` +
+                                 `<small style="color:#666;">(${dateString})</small>`;
+                }
+            }
+
             customTbody.innerHTML += `
                 <tr>
                     <td><strong>${code}</strong></td>
-                    <td style="color:${isPerm?'#7b1fa2':'#2e7d32'}; font-weight:bold;">${isPerm ? '♾️ถาวร♾️' : new Date(exp).toLocaleDateString('th-TH')}</td>
+                    <td>${statusHTML}</td>
                     <td align="right">
-                        <button class="btn-perm" onclick="togglePermanent('${code}', ${isPerm})">♾️ถาวร♾️</button>
+                        <button class="btn-perm" onclick="togglePermanent('${code}', ${isPerm})">♾️ถาวร</button>
                         <button class="btn-add" onclick="toggleAddDay('${code}')">🗓 เพิ่มวัน</button>
                         <button class="btn-del" onclick="deleteCode('${code}')">🗑️ ลบ</button>
                         <div id="box-${code}" class="add-day-box">
@@ -249,7 +269,7 @@ window.saveNewDays = (c) => {
     const days = document.getElementById(`input-${c}`).value;
     db.ref('custom_codes/'+c).once('value', s => {
         let cur = s.val() ? s.val().expireAt : Date.now();
-        if(cur >= PERM_VAL || cur < Date.now()) cur = Date.now();
+        if(cur >= 3000000000000 || cur < Date.now()) cur = Date.now();
         db.ref('custom_codes/'+c).update({ expireAt: cur + (parseInt(days)*24*60*60*1000) });
         document.getElementById(`box-${c}`).style.display = 'none';
         Swal.fire('เพิ่มวันสำเร็จ! 🗓️', '', 'success');
