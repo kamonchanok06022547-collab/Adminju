@@ -37,12 +37,15 @@
         /* Grid สำหรับดูรหัสทั้งหมด */
         .code-status-grid { 
             display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); 
-            gap: 6px; margin: 10px 0; max-height: 150px; overflow-y: auto; 
+            gap: 6px; margin: 10px 0; max-height: 250px; overflow-y: auto; 
             padding: 10px; background: #f9f9f9; border-radius: 12px;
         }
-        .code-badge { font-size: 0.7rem; padding: 6px; border-radius: 6px; text-align: center; border: 1px solid #eee; font-weight: bold; }
-        .code-badge.active { background: #e8f5e9; color: #2e7d32; border-color: #4caf50; }
-        .code-badge.idle { background: #fff; color: #bbb; }
+        .code-badge { font-size: 0.7rem; padding: 6px; border-radius: 6px; text-align: center; border: 1px solid #eee; font-weight: bold; transition: 0.3s; }
+        
+        /* สถานะเขียว = ออนไลน์จริงๆ */
+        .code-badge.active { background: #e8f5e9; color: #2e7d32; border-color: #00e676; box-shadow: 0 0 5px rgba(0,230,118,0.5); }
+        /* สถานะเทา = ออฟไลน์ หรือปิดหน้าเว็บไปแล้ว */
+        .code-badge.idle { background: #fff; color: #bbb; border-color: #eee; }
 
         .table-wrapper { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 400px; }
@@ -50,11 +53,10 @@
         td { padding: 12px; border-bottom: 1px solid #f0f4f8; font-size: 0.85rem; }
 
         button { cursor: pointer; border: none; font-weight: 600; border-radius: 8px; transition: 0.2s; padding: 8px 12px; }
-        button:active { transform: scale(0.95); }
         .kick-btn { background: #ffb74d; color: white; }
         .ban-btn { background: #ff5252; color: white; margin-left: 4px; }
         .unban-btn { background: #40c4ff; color: white; width: 100%; }
-        .del-btn { background: #90a4ae; color: white; padding: 5px 10px; font-size: 0.75rem; }
+        .del-btn { background: #ff5252; color: white; padding: 5px 10px; font-size: 0.75rem; }
         .add-btn { background: var(--primary-blue); color: white; padding: 12px 20px; border-radius: 12px; }
         .login-btn { background: linear-gradient(90deg, #2196f3, #ff4081); color: white; width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 15px; }
 
@@ -90,6 +92,11 @@
     </div>
 
     <div class="card">
+        <h3 style="color: var(--primary-blue);">📊 สถานะรหัส (เขียว = กำลังเล่นหน้าเว็บ)</h3>
+        <div id="codeStatusGrid" class="code-status-grid"></div>
+    </div>
+
+    <div class="card">
         <h3 style="color: var(--primary-blue);">➕ เพิ่มรหัสเข้าใช้งานใหม่</h3>
         <div style="display: flex; gap: 8px;">
             <input id="newCodeInput" type="text" placeholder="พิมพ์ชื่อรหัสที่ต้องการ" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #bbdefb; outline: none;">
@@ -103,12 +110,7 @@
     </div>
 
     <div class="card">
-        <h3 style="color: var(--primary-blue);">📊 ตรวจสอบรหัส (เขียว = มีคนใช้)</h3>
-        <div id="codeStatusGrid" class="code-status-grid"></div>
-    </div>
-
-    <div class="card">
-        <h3 style="color:#2e7d32;"><span class="dot online"></span> ผู้ใช้ออนไลน์ (Real-time)</h3>
+        <h3 style="color:#2e7d32;"><span class="dot online"></span> รายชื่อผู้ใช้งานปัจจุบัน</h3>
         <div class="table-wrapper">
             <table>
                 <thead>
@@ -124,7 +126,7 @@
         <div class="table-wrapper">
             <table>
                 <thead>
-                    <tr><th>รหัสเครื่อง (Device ID)</th><th>จัดการ</th></tr>
+                    <tr><th>Device ID</th><th>จัดการ</th></tr>
                 </thead>
                 <tbody id="banListTableBody"></tbody>
             </table>
@@ -148,7 +150,6 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const ADMIN_PASS = "adminwinjunior";
 
-// รหัสถาวร
 const USER_CODES = ["winju0101","juwin0202","jujuwin0303","lekwinju0404","winlek0505","jueiei0606","juny0707","niorwin0808","winnior0909","winarrai1010","lnwwinju1111","julnwwin1212","asdf1313","zxcv1414","qwer1616","popo1717","ziber1818","fahsai1919","kaimook2020","rich9999","gold8888","lucky789","money168","winwin24","star555","smile11","power88","bestwin9","junior007"];
 
 function doLogin() {
@@ -188,16 +189,20 @@ function loadData() {
             customTbody.innerHTML += `<tr><td><strong>${code}</strong></td><td align="right"><button class="del-btn" onclick="deleteCode('${code}')">ลบ</button></td></tr>`;
         });
 
-        // 2. Grid ดูสถานะรหัสทั้งหมด
+        // 2. Grid ตรวจสอบรหัส (เขียว/เทา ตามการใช้งานหน้าเว็บจริง)
         const grid = document.getElementById("codeStatusGrid");
         grid.innerHTML = "";
         const allCodes = [...USER_CODES, ...Object.keys(custom)];
+        
         allCodes.forEach(code => {
-            const isOnline = online[code] && online[code].status === 'online';
-            grid.innerHTML += `<div class="code-badge ${isOnline ? 'active' : 'idle'}">${code}</div>`;
+            // เงื่อนไข: ต้องมีข้อมูลใน online_users และสถานะต้องเป็น 'online' เท่านั้นถึงจะเขียว
+            const userStatus = online[code] ? online[code].status : 'offline';
+            const isActive = userStatus === 'online';
+            
+            grid.innerHTML += `<div class="code-badge ${isActive ? 'active' : 'idle'}">${code}</div>`;
         });
 
-        // 3. คนออนไลน์
+        // 3. รายการคนออนไลน์ (ตารางล่าง)
         const onlineTbody = document.getElementById("onlineListTableBody");
         onlineTbody.innerHTML = "";
         Object.keys(online).forEach(key => {
@@ -219,12 +224,7 @@ function loadData() {
         const banTbody = document.getElementById("banListTableBody");
         banTbody.innerHTML = "";
         Object.keys(blacklist).forEach(id => {
-            banTbody.innerHTML += `
-                <tr>
-                    <td style="word-break: break-all;">${id}</td>
-                    <td><button class="unban-btn" onclick="unbanUser('${id}')">ปลดแบน</button></td>
-                </tr>
-            `;
+            banTbody.innerHTML += `<tr><td style="word-break: break-all;">${id}</td><td><button class="unban-btn" onclick="unbanUser('${id}')">ปลดแบน</button></td></tr>`;
         });
     });
 }
@@ -240,20 +240,20 @@ window.addNewCode = () => {
 };
 
 window.deleteCode = (code) => {
-    if(confirm(`ต้องการลบรหัส [${code}]? สมาชิกที่ใช้อยู่จะเข้าไม่ได้ทันที`)) {
+    if(confirm(`ลบรหัส [${code}]?`)) {
         db.ref('custom_codes/' + code).remove();
         db.ref('online_users/' + code).remove();
     }
 };
 
 window.kickUser = (key) => {
-    if(confirm("ยืนยันการเตะยูสเซอร์นี้ออกจากระบบ?")) {
+    if(confirm("เตะคนนี้ออก?")) {
         db.ref('online_users/' + key).remove();
     }
 };
 
 window.banUser = (deviceId, key) => {
-    if(!deviceId || deviceId === "undefined") { alert("ไม่พบรหัสเครื่อง"); return; }
+    if(!deviceId || deviceId === "undefined") { alert("ไม่พบ Device ID"); return; }
     if(confirm("แบนเครื่องนี้ถาวร?")) {
         db.ref('blacklist/' + deviceId).set(true);
         db.ref('online_users/' + key).remove();
