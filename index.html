@@ -4,146 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ADMIN MONITOR - LEKWIN JUNIOR</title>
-    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
     <style>
-        :root {
-            --primary-blue: #1565c0;
-            --pastel-blue: #e3f2fd;
-            --accent-pink: #ff4081;
-            --success-green: #00e676;
-            --offline-gray: #cfd8dc;
-        }
-
-        * { box-sizing: border-box; }
-        html, body { margin: 0; padding: 0; min-height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--pastel-blue); }
-        body { display: flex; flex-direction: column; align-items: center; padding: 20px 10px; }
-        
+        :root { --primary: #1565c0; --success: #00e676; --gray: #cfd8dc; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #e3f2fd; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 600px; }
+        .card { background: #fff; border-radius: 20px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
         
-        .logo-header { text-align: center; margin-bottom: 20px; }
-        .logo-header img { 
-            width: 90px; height: 90px; border-radius: 20px; 
-            object-fit: cover; border: 4px solid #fff; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-        }
-        .logo-header h1 { font-size: 1.4rem; color: var(--primary-blue); margin: 10px 0 5px; }
-        .logo-header p { color: var(--accent-pink); font-size: 0.8rem; font-weight: bold; margin: 0; letter-spacing: 1px; }
-
-        .card { background: #fff; border-radius: 20px; padding: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #bbdefb; }
-        .card h3 { margin-top: 0; font-size: 1rem; display: flex; align-items: center; gap: 8px; color: var(--primary-blue); }
-        
-        /* Grid สถานะรหัส */
-        .code-status-grid { 
+        /* Grid ดูรหัส - ปรับสีให้ชัดเจน */
+        .code-grid { 
             display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); 
-            gap: 6px; margin: 10px 0; max-height: 250px; overflow-y: auto; 
-            padding: 10px; background: #f8f9fa; border-radius: 12px; border: 1px solid #eee;
+            gap: 8px; padding: 10px; background: #f8f9fa; border-radius: 12px; 
         }
-        .code-badge { 
-            font-size: 0.65rem; padding: 8px 4px; border-radius: 8px; text-align: center; 
-            border: 1px solid #eee; font-weight: bold; transition: all 0.3s ease;
-            background: #fff; color: #999;
+        .badge { 
+            font-size: 0.7rem; padding: 8px 4px; border-radius: 8px; text-align: center; 
+            border: 1px solid #eee; font-weight: bold; background: white; color: #bbb;
         }
-        /* ถ้าออนไลน์จะขึ้นสีเขียว */
-        .code-badge.active { 
-            background: #e8f5e9; color: #2e7d32; border-color: var(--success-green); 
-            box-shadow: 0 0 10px rgba(0, 230, 118, 0.2);
+        /* สถานะตอนออนไลน์ */
+        .badge.on { 
+            background: #00e676 !important; 
+            color: white !important; 
+            border-color: #00c853 !important;
+            box-shadow: 0 0 10px rgba(0, 230, 118, 0.5);
         }
 
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 450px; }
-        th { background: #fce4ec; color: #ad1457; padding: 12px; text-align: left; font-size: 0.8rem; border-bottom: 2px solid #f8bbd0; }
-        td { padding: 12px; border-bottom: 1px solid #f0f4f8; font-size: 0.8rem; vertical-align: middle; }
-
-        button { cursor: pointer; border: none; font-weight: 600; border-radius: 8px; transition: 0.2s; padding: 8px 12px; }
-        button:active { transform: scale(0.95); }
-        .kick-btn { background: #ffb74d; color: white; font-size: 0.75rem; }
-        .ban-btn { background: #ff5252; color: white; font-size: 0.75rem; margin-left: 4px; }
-        .unban-btn { background: #40c4ff; color: white; width: 100%; font-size: 0.8rem; }
-        .del-btn { background: #eceff1; color: #78909c; padding: 4px 8px; font-size: 0.7rem; border: 1px solid #cfd8dc; }
-        .add-btn { background: var(--primary-blue); color: white; padding: 12px 20px; border-radius: 12px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 10px; font-size: 0.8rem; background: #fce4ec; }
+        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 0.85rem; }
+        .dot { height: 12px; width: 12px; border-radius: 50%; display: inline-block; background: var(--gray); }
+        .dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
         
-        .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
-        .online { background: var(--success-green); box-shadow: 0 0 8px var(--success-green); }
-        .offline { background: var(--offline-gray); }
-
-        /* Login Overlay */
-        #loginOverlay { position: fixed; inset: 0; background: linear-gradient(135deg, #e3f2fd 0%, #fce4ec 100%); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .login-card { background: white; width: 100%; max-width: 350px; padding: 30px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; }
-        .login-card input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 15px; text-align: center; font-size: 1rem; outline: none; }
-        
-        #logoutBtn { background: #90a4ae; color: white; padding: 12px; width: 100%; margin-top: 10px; border-radius: 12px; font-size: 0.9rem; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 10px; }
+        button { cursor: pointer; border: none; border-radius: 8px; padding: 8px 12px; font-weight: bold; }
+        .btn-add { background: var(--primary); color: white; width: 100%; padding: 12px; }
+        .btn-kick { background: #ffb74d; color: white; }
     </style>
 </head>
 <body>
 
-<div id="loginOverlay">
-    <div class="login-card">
-        <div class="logo-header">
-            <img src="https://i.pinimg.com/1200x/7a/82/11/7a8211a2161799550aa868aaab6d5c84.jpg" alt="Logo">
-            <h2>Admin Login</h2>
-        </div>
-        <input id="userPass" type="password" placeholder="ใส่รหัสผ่านแอดมิน">
-        <button class="add-btn" style="width:100%" onclick="doLogin()">เข้าสู่ระบบ</button>
-    </div>
-</div>
-
-<div id="main" class="container" style="display:none;">
-    <div class="logo-header">
-        <img src="https://i.pinimg.com/1200x/7a/82/11/7a8211a2161799550aa868aaab6d5c84.jpg" alt="Logo">
-        <h1>แผงควบคุมแอดมิน</h1>
-        <p>🌟 LEKWIN JUNIOR MONITOR 🌟</p>
+<div id="main" class="container">
+    <div style="text-align:center; margin-bottom:20px;">
+        <img src="https://i.pinimg.com/1200x/7a/82/11/7a8211a2161799550aa868aaab6d5c84.jpg" style="width:80px; border-radius:15px;">
+        <h2 style="color:var(--primary);">ADMIN SYSTEM</h2>
     </div>
 
     <div class="card">
-        <h3>📊 ตรวจสอบสถานะรหัส (เขียว=ออนไลน์)</h3>
-        <div id="codeStatusGrid" class="code-status-grid"></div>
+        <h3>📊 สถานะรหัสทั้งหมด (เขียว = ใช้งาน)</h3>
+        <div id="gridStatus" class="code-grid"></div>
     </div>
 
     <div class="card">
-        <h3>➕ เพิ่มรหัสเข้าใช้งานใหม่</h3>
-        <div style="display: flex; gap: 8px;">
-            <input id="newCodeInput" type="text" placeholder="พิมพ์ชื่อรหัส" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #bbdefb; outline: none;">
-            <button class="add-btn" onclick="addNewCode()">สร้างรหัส</button>
-        </div>
-        <div class="table-wrapper" style="margin-top: 12px; max-height: 150px;">
-            <table>
-                <tbody id="customCodeTableBody"></tbody>
-            </table>
-        </div>
+        <h3>👥 รายชื่อคนออนไลน์ตอนนี้</h3>
+        <table>
+            <thead><tr><th>รหัส</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+            <tbody id="userList"></tbody>
+        </table>
     </div>
 
     <div class="card">
-        <h3 style="color:#2e7d32;"><span class="dot online"></span> รายชื่อผู้ใช้งานปัจจุบัน</h3>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr><th>ชื่อ/รหัส</th><th>สถานะ</th><th>ID เครื่อง</th><th>จัดการ</th></tr>
-                </thead>
-                <tbody id="onlineListTableBody"></tbody>
-            </table>
-        </div>
+        <h3>➕ สร้างรหัสชั่วคราว</h3>
+        <input id="newCode" type="text" placeholder="พิมพ์ชื่อรหัสที่นี่">
+        <button class="btn-add" onclick="addCode()">สร้างรหัสใหม่</button>
     </div>
-
-    <div class="card">
-        <h3 style="color:#c62828;">🚫 รายการที่ถูกแบน (Blacklist)</h3>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr><th>รหัสเครื่อง (Device ID)</th><th>จัดการ</th></tr>
-                </thead>
-                <tbody id="banListTableBody"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <button id="logoutBtn" onclick="doLogout()">ออกจากระบบแอดมิน</button>
 </div>
 
 <script>
-// --- CONFIGURATION ---
 const firebaseConfig = {
     apiKey: "AIzaSyC1iAT_0vKk6Uew2VJtN3_wx4JszVTTTjY",
     authDomain: "junior-nior.firebaseapp.com",
@@ -155,138 +82,57 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const ADMIN_PASS = "adminwinjunior";
 
-// รายชื่อรหัสถาวร
-const USER_CODES = ["winju0101","juwin0202","jujuwin0303","lekwinju0404","winlek0505","jueiei0606","juny0707","niorwin0808","winnior0909","winarrai1010","lnwwinju1111","julnwwin1212","asdf1313","zxcv1414","qwer1616","popo1717","ziber1818","fahsai1919","kaimook2020","rich9999","gold8888","lucky789","money168","winwin24","star555","smile11","power88","bestwin9","junior007"];
+const FIXED_CODES = ["winju0101","juwin0202","jujuwin0303","lekwinju0404","winlek0505","jueiei0606","juny0707","niorwin0808","winnior0909","winarrai1010","lnwwinju1111","julnwwin1212","asdf1313","zxcv1414","qwer1616","popo1717","ziber1818","fahsai1919","kaimook2020","rich9999","gold8888","lucky789","money168","winwin24","star555","smile11","power88","bestwin9","junior007"];
 
-// --- AUTH SYSTEM ---
-function doLogin() {
-    const p = document.getElementById("userPass").value;
-    if(p === ADMIN_PASS) {
-        sessionStorage.setItem("isAdminActive", "true");
-        checkAuth();
-    } else {
-        alert("รหัสผ่านไม่ถูกต้อง!");
-    }
-}
+function updateMonitor() {
+    db.ref().on('value', (snap) => {
+        const data = snap.val() || {};
+        const onlineUsers = data.online_users || {};
+        const customCodes = data.custom_codes || {};
 
-function doLogout() {
-    sessionStorage.clear();
-    location.reload();
-}
-
-function checkAuth() {
-    if(sessionStorage.getItem("isAdminActive") === "true") {
-        document.getElementById("loginOverlay").style.display = "none";
-        document.getElementById("main").style.display = "block";
-        loadData();
-    }
-}
-
-// --- DATA SYSTEM ---
-function loadData() {
-    // ใช้ .on('value') เพื่อให้หน้าจอ Admin อัปเดตสดๆ ตลอดเวลา
-    db.ref().on('value', (snapshot) => {
-        const data = snapshot.val() || {};
-        const online = data.online_users || {};
-        const custom = data.custom_codes || {};
-        const blacklist = data.blacklist || {};
-
-        // 1. ตารางรหัสสร้างเอง
-        const customTbody = document.getElementById("customCodeTableBody");
-        customTbody.innerHTML = "";
-        Object.keys(custom).forEach(code => {
-            customTbody.innerHTML += `
-                <tr>
-                    <td><strong>${code}</strong></td>
-                    <td align="right"><button class="del-btn" onclick="deleteCode('${code}')">ลบ</button></td>
-                </tr>`;
-        });
-
-        // 2. Grid สถานะรหัส (หัวใจสำคัญ: เช็คออนไลน์/ออฟไลน์)
-        const grid = document.getElementById("codeStatusGrid");
+        // 1. จัดการ Grid (รวมรหัสถาวร + รหัสสร้างเอง)
+        const grid = document.getElementById("gridStatus");
         grid.innerHTML = "";
-        const allCodes = [...USER_CODES, ...Object.keys(custom)];
-        
-        allCodes.forEach(code => {
-            // ถ้ารหัสนี้ในฐานข้อมูลมีสถานะเป็น 'online' ให้ใส่ Class 'active'
-            const isOnline = online[code] && online[code].status === 'online';
-            grid.innerHTML += `<div class="code-badge ${isOnline ? 'active' : ''}">${code}</div>`;
-        });
+        const all = [...FIXED_CODES, ...Object.keys(customCodes)];
 
-        // 3. รายละเอียดรายชื่อที่ออนไลน์ในตาราง
-        const onlineTbody = document.getElementById("onlineListTableBody");
-        onlineTbody.innerHTML = "";
-        Object.keys(online).forEach(key => {
-            const u = online[key];
-            const statusClass = u.status === 'online' ? 'online' : 'offline';
+        all.forEach(code => {
+            // แก้ไขเงื่อนไข: ถ้ามีรหัสอยู่ใน online_users และสถานะไม่ใช่ offline ให้ขึ้นเขียว
+            const userData = onlineUsers[code];
+            const isOnline = userData && (userData.status === 'online' || userData.status === undefined);
             
-            onlineTbody.innerHTML += `
-                <tr>
-                    <td><strong>${u.pass || key}</strong><br><small style="color:#999">${u.name || 'User'}</small></td>
-                    <td><span class="dot ${statusClass}"></span> ${u.status === 'online' ? 'ใช้งานอยู่' : 'ปิดหน้าเว็บ'}</td>
-                    <td style="font-size:0.6rem; color:#888; max-width:80px; word-break:break-all;">${u.deviceId || '-'}</td>
-                    <td>
-                        <button class="kick-btn" onclick="kickUser('${key}')">เตะ</button>
-                        <button class="ban-btn" onclick="banUser('${u.deviceId}','${key}')">แบน</button>
-                    </td>
-                </tr>`;
+            grid.innerHTML += `<div class="badge ${isOnline ? 'on' : ''}">${code}</div>`;
         });
 
-        // 4. Blacklist
-        const banTbody = document.getElementById("banListTableBody");
-        banTbody.innerHTML = "";
-        Object.keys(blacklist).forEach(id => {
-            banTbody.innerHTML += `
-                <tr>
-                    <td style="word-break: break-all; font-size:0.7rem;">${id}</td>
-                    <td><button class="unban-btn" onclick="unbanUser('${id}')">ปลดแบน</button></td>
-                </tr>`;
+        // 2. รายชื่อในตาราง
+        const table = document.getElementById("userList");
+        table.innerHTML = "";
+        Object.keys(onlineUsers).forEach(key => {
+            const u = onlineUsers[key];
+            if(u.status !== 'offline') { // โชว์เฉพาะคนที่ไม่ใช่ offline
+                table.innerHTML += `
+                    <tr>
+                        <td><strong>${key}</strong></td>
+                        <td><span class="dot online"></span> ออนไลน์</td>
+                        <td><button class="btn-kick" onclick="kick('${key}')">เตะ</button></td>
+                    </tr>`;
+            }
         });
     });
 }
 
-// --- ACTIONS ---
-window.addNewCode = () => {
-    const code = document.getElementById("newCodeInput").value.trim();
-    if(code) {
-        db.ref('custom_codes/' + code).set(true).then(() => {
-            document.getElementById("newCodeInput").value = "";
-        });
-    }
-};
+function addCode() {
+    const c = document.getElementById("newCode").value.trim();
+    if(c) db.ref('custom_codes/'+c).set(true).then(()=>document.getElementById("newCode").value="");
+}
 
-window.deleteCode = (code) => {
-    if(confirm(`ยืนยันการลบรหัส [${code}]?`)) {
-        db.ref('custom_codes/' + code).remove();
-        db.ref('online_users/' + code).remove();
+function kick(key) {
+    if(confirm('เตะรหัส '+key+'?')) {
+        db.ref('online_users/'+key).remove();
     }
-};
+}
 
-window.kickUser = (key) => {
-    if(confirm("ยืนยันการเตะออกจากระบบ?")) {
-        // การลบข้อมูลจาก online_users จะทำให้ฝั่ง User โดนเด้งออกทันที
-        db.ref('online_users/' + key).remove();
-    }
-};
-
-window.banUser = (deviceId, key) => {
-    if(!deviceId || deviceId === "undefined") { alert("ไม่พบ ID เครื่องของผู้ใช้รายนี้"); return; }
-    if(confirm("แบนเครื่องนี้ถาวร? ผู้ใช้คนนี้จะเข้าเว็บไม่ได้อีกเลย")) {
-        db.ref('blacklist/' + deviceId).set(true);
-        db.ref('online_users/' + key).remove();
-    }
-};
-
-window.unbanUser = (id) => {
-    if(confirm("ปลดแบนเครื่องนี้?")) {
-        db.ref('blacklist/' + id).remove();
-    }
-};
-
-// เริ่มต้นตรวจสอบสิทธิ์
-checkAuth();
+updateMonitor();
 </script>
 </body>
 </html>
