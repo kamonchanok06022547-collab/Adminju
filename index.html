@@ -1,72 +1,272 @@
-<div class="card">
-    <h3 style="color:#6a1b9a;">🔑 จัดการรหัส & ต่ออายุ</h3>
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>รหัส (Key)</th>
-                    <th>สถานะผู้ใช้</th>
-                    <th>เหลือเวลา</th>
-                    <th>หมดอายุวันที่</th>
-                    <th>จัดการ</th>
-                </tr>
-            </thead>
-            <tbody id="keyListTableBody"></tbody>
-        </table>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ADMIN MONITOR - LEKWIN JUNIOR</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <style>
+        :root {
+            --primary-blue: #1565c0;
+            --pastel-blue: #e3f2fd;
+            --accent-pink: #ff4081;
+            --success-green: #00e676;
+        }
+
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; min-height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--pastel-blue); }
+        body { display: flex; flex-direction: column; align-items: center; padding: 20px 10px; }
+        
+        .container { width: 100%; max-width: 600px; }
+        
+        .logo-header { text-align: center; margin-bottom: 20px; }
+        .logo-header img { 
+            width: 100px; height: 100px; border-radius: 20px; 
+            object-fit: cover; border: 4px solid #fff; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        }
+        .logo-header h1 { font-size: 1.5rem; color: var(--primary-blue); margin: 10px 0 5px; }
+        .logo-header p { color: var(--accent-pink); font-size: 0.85rem; font-weight: bold; margin: 0; }
+
+        .card { background: #fff; border-radius: 20px; padding: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #bbdefb; }
+        .card h3 { margin-top: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+        
+        /* Grid สำหรับดูรหัสทั้งหมด */
+        .code-status-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); 
+            gap: 6px; margin: 10px 0; max-height: 150px; overflow-y: auto; 
+            padding: 10px; background: #f9f9f9; border-radius: 12px;
+        }
+        .code-badge { font-size: 0.7rem; padding: 6px; border-radius: 6px; text-align: center; border: 1px solid #eee; font-weight: bold; }
+        .code-badge.active { background: #e8f5e9; color: #2e7d32; border-color: #4caf50; }
+        .code-badge.idle { background: #fff; color: #bbb; }
+
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 400px; }
+        th { background: #fce4ec; color: #ad1457; padding: 12px; text-align: left; font-size: 0.85rem; border-bottom: 2px solid #f8bbd0; }
+        td { padding: 12px; border-bottom: 1px solid #f0f4f8; font-size: 0.85rem; }
+
+        button { cursor: pointer; border: none; font-weight: 600; border-radius: 8px; transition: 0.2s; padding: 8px 12px; }
+        button:active { transform: scale(0.95); }
+        .kick-btn { background: #ffb74d; color: white; }
+        .ban-btn { background: #ff5252; color: white; margin-left: 4px; }
+        .unban-btn { background: #40c4ff; color: white; width: 100%; }
+        .del-btn { background: #90a4ae; color: white; padding: 5px 10px; font-size: 0.75rem; }
+        .add-btn { background: var(--primary-blue); color: white; padding: 12px 20px; border-radius: 12px; }
+        .login-btn { background: linear-gradient(90deg, #2196f3, #ff4081); color: white; width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 15px; }
+
+        .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
+        .online { background: var(--success-green); box-shadow: 0 0 8px var(--success-green); }
+        .offline { background: #cfd8dc; }
+
+        #loginOverlay { position: fixed; inset: 0; background: linear-gradient(135deg, #e3f2fd 0%, #fce4ec 100%); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .login-card { background: white; width: 100%; max-width: 350px; padding: 30px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; }
+        .login-card input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 15px; text-align: center; font-size: 1rem; }
+
+        #logoutBtn { background: #90a4ae; color: white; padding: 12px; width: 100%; margin-top: 10px; border-radius: 12px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<div id="loginOverlay">
+    <div class="login-card">
+        <div class="logo-header">
+            <img src="https://i.pinimg.com/1200x/7a/82/11/7a8211a2161799550aa868aaab6d5c84.jpg" alt="Logo">
+            <h2>Admin Login</h2>
+        </div>
+        <input id="userPass" type="password" placeholder="ใส่รหัสผ่านแอดมิน">
+        <button class="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
     </div>
 </div>
 
+<div id="main" class="container" style="display:none;">
+    <div class="logo-header">
+        <img src="https://i.pinimg.com/1200x/7a/82/11/7a8211a2161799550aa868aaab6d5c84.jpg" alt="Logo">
+        <h1>แผงควบคุมแอดมิน</h1>
+        <p>🌟 LEKWIN JUNIOR SYSTEM 🌟</p>
+    </div>
+
+    <div class="card">
+        <h3 style="color: var(--primary-blue);">➕ เพิ่มรหัสเข้าใช้งานใหม่</h3>
+        <div style="display: flex; gap: 8px;">
+            <input id="newCodeInput" type="text" placeholder="พิมพ์ชื่อรหัสที่ต้องการ" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #bbdefb; outline: none;">
+            <button class="add-btn" onclick="addNewCode()">สร้างรหัส</button>
+        </div>
+        <div class="table-wrapper" style="margin-top: 10px; max-height: 150px;">
+            <table>
+                <tbody id="customCodeTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="color: var(--primary-blue);">📊 ตรวจสอบรหัส (เขียว = มีคนใช้)</h3>
+        <div id="codeStatusGrid" class="code-status-grid"></div>
+    </div>
+
+    <div class="card">
+        <h3 style="color:#2e7d32;"><span class="dot online"></span> ผู้ใช้ออนไลน์ (Real-time)</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th>ชื่อ</th><th>รหัส</th><th>สถานะ</th><th>จัดการ</th></tr>
+                </thead>
+                <tbody id="onlineListTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="color:#c62828;">🚫 บัญชีที่ถูกระงับ (Blacklist)</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th>รหัสเครื่อง (Device ID)</th><th>จัดการ</th></tr>
+                </thead>
+                <tbody id="banListTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <button id="logoutBtn" onclick="doLogout()">ออกจากระบบแอดมิน</button>
+</div>
+
 <script>
-function loadKeys() {
-    db.ref('license_keys').on('value', (snapshot) => {
-        const tbody = document.getElementById("keyListTableBody");
-        tbody.innerHTML = "";
-        const data = snapshot.val();
-        if(data) {
-            Object.keys(data).forEach(id => {
-                const k = data[id];
-                const now = new Date().getTime();
-                let remainingText = "-";
-                let statusColor = "green";
+const firebaseConfig = {
+    apiKey: "AIzaSyC1iAT_0vKk6Uew2VJtN3_wx4JszVTTTjY",
+    authDomain: "junior-nior.firebaseapp.com",
+    databaseURL: "https://junior-nior-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "junior-nior",
+    storageBucket: "junior-nior.firebasestorage.app",
+    messagingSenderId: "225309280850",
+    appId: "1:225309280850:web:49e3f857eb8a4a250a2d8b"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const ADMIN_PASS = "adminwinjunior";
 
-                if (k.expireDate) {
-                    const diff = k.expireDate - now;
-                    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                    if (days > 0) {
-                        remainingText = days + " วัน";
-                    } else {
-                        remainingText = "หมดอายุ";
-                        statusColor = "red";
-                    }
-                }
+// รหัสถาวร
+const USER_CODES = ["winju0101","juwin0202","jujuwin0303","lekwinju0404","winlek0505","jueiei0606","juny0707","niorwin0808","winnior0909","winarrai1010","lnwwinju1111","julnwwin1212","asdf1313","zxcv1414","qwer1616","popo1717","ziber1818","fahsai1919","kaimook2020","rich9999","gold8888","lucky789","money168","winwin24","star555","smile11","power88","bestwin9","junior007"];
 
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td><strong>${k.key}</strong></td>
-                    <td>${k.status === 'unused' ? 'ยังไม่ใช้' : 'ID: '+k.usedBy}</td>
-                    <td style="font-weight:bold; color:${statusColor}">${remainingText}</td>
-                    <td>${k.expireDate ? new Date(k.expireDate).toLocaleDateString('th-TH') : "-"}</td>
+function doLogin() {
+    const p = document.getElementById("userPass").value;
+    if(p === ADMIN_PASS) {
+        sessionStorage.setItem("isAdminActive", "true");
+        checkAuth();
+    } else {
+        alert("รหัสผ่านไม่ถูกต้อง!");
+    }
+}
+
+function doLogout() {
+    sessionStorage.clear();
+    location.reload();
+}
+
+function checkAuth() {
+    if(sessionStorage.getItem("isAdminActive") === "true") {
+        document.getElementById("loginOverlay").style.display = "none";
+        document.getElementById("main").style.display = "block";
+        loadData();
+    }
+}
+
+function loadData() {
+    db.ref().on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        const online = data.online_users || {};
+        const custom = data.custom_codes || {};
+        const blacklist = data.blacklist || {};
+
+        // 1. ตารางรหัสสร้างเอง (ลบได้)
+        const customTbody = document.getElementById("customCodeTableBody");
+        customTbody.innerHTML = "";
+        Object.keys(custom).forEach(code => {
+            customTbody.innerHTML += `<tr><td><strong>${code}</strong></td><td align="right"><button class="del-btn" onclick="deleteCode('${code}')">ลบ</button></td></tr>`;
+        });
+
+        // 2. Grid ดูสถานะรหัสทั้งหมด
+        const grid = document.getElementById("codeStatusGrid");
+        grid.innerHTML = "";
+        const allCodes = [...USER_CODES, ...Object.keys(custom)];
+        allCodes.forEach(code => {
+            const isOnline = online[code] && online[code].status === 'online';
+            grid.innerHTML += `<div class="code-badge ${isOnline ? 'active' : 'idle'}">${code}</div>`;
+        });
+
+        // 3. คนออนไลน์
+        const onlineTbody = document.getElementById("onlineListTableBody");
+        onlineTbody.innerHTML = "";
+        Object.keys(online).forEach(key => {
+            const u = online[key];
+            onlineTbody.innerHTML += `
+                <tr>
+                    <td><strong>${u.name || 'N/A'}</strong></td>
+                    <td>${u.pass || 'N/A'}</td>
+                    <td><span class="dot ${u.status === 'online' ? 'online' : 'offline'}"></span></td>
                     <td>
-                        <button onclick="renewKey('${id}')" style="background:#4caf50; color:white;">+30 วัน</button>
-                        <button onclick="deleteKey('${id}')" style="background:#ff5252; color:white;">ลบ</button>
+                        <button class="kick-btn" onclick="kickUser('${key}')">เตะ</button>
+                        <button class="ban-btn" onclick="banUser('${u.deviceId}','${key}')">แบน</button>
                     </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+                </tr>
+            `;
+        });
+
+        // 4. Blacklist
+        const banTbody = document.getElementById("banListTableBody");
+        banTbody.innerHTML = "";
+        Object.keys(blacklist).forEach(id => {
+            banTbody.innerHTML += `
+                <tr>
+                    <td style="word-break: break-all;">${id}</td>
+                    <td><button class="unban-btn" onclick="unbanUser('${id}')">ปลดแบน</button></td>
+                </tr>
+            `;
+        });
     });
 }
 
-// ฟังก์ชันกดต่ออายุจากหน้าแอดมิน
-window.renewKey = (id) => {
-    const keyRef = db.ref('license_keys/' + id);
-    keyRef.once('value').then((snap) => {
-        const data = snap.val();
-        if (!data.expireDate) return alert("รหัสนี้ยังไม่มีการใช้งาน (ต่ออายุไม่ได้)");
-        
-        const newExpire = data.expireDate + (30 * 24 * 60 * 60 * 1000); // เพิ่ม 30 วัน
-        keyRef.update({ expireDate: newExpire });
-        alert("ต่ออายุให้รหัส " + id + " เรียบร้อยแล้ว!");
-    });
-}
+// --- ACTIONS ---
+window.addNewCode = () => {
+    const code = document.getElementById("newCodeInput").value.trim();
+    if(code) {
+        db.ref('custom_codes/' + code).set(true).then(() => {
+            document.getElementById("newCodeInput").value = "";
+        });
+    }
+};
+
+window.deleteCode = (code) => {
+    if(confirm(`ต้องการลบรหัส [${code}]? สมาชิกที่ใช้อยู่จะเข้าไม่ได้ทันที`)) {
+        db.ref('custom_codes/' + code).remove();
+        db.ref('online_users/' + code).remove();
+    }
+};
+
+window.kickUser = (key) => {
+    if(confirm("ยืนยันการเตะยูสเซอร์นี้ออกจากระบบ?")) {
+        db.ref('online_users/' + key).remove();
+    }
+};
+
+window.banUser = (deviceId, key) => {
+    if(!deviceId || deviceId === "undefined") { alert("ไม่พบรหัสเครื่อง"); return; }
+    if(confirm("แบนเครื่องนี้ถาวร?")) {
+        db.ref('blacklist/' + deviceId).set(true);
+        db.ref('online_users/' + key).remove();
+    }
+};
+
+window.unbanUser = (id) => {
+    if(confirm("ปลดแบนเครื่องนี้?")) {
+        db.ref('blacklist/' + id).remove();
+    }
+};
+
+checkAuth();
 </script>
+</body>
+</html>
