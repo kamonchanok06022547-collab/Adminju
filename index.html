@@ -7,14 +7,17 @@
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         :root {
             --primary-blue: #1565c0;
             --pastel-blue: #e3f2fd;
+            --pastel-pink: #fce4ec; 
+            --pastel-green: #e8f5e9; 
+            --pastel-red: #ffebee; 
+            --pastel-orange: #fff3e0; 
             --accent-pink: #ff4081;
-            --success-green: #00e676;
-            --soft-purple: #f3e5f5;
         }
 
         * { box-sizing: border-box; }
@@ -32,59 +35,48 @@
         .logo-header h1 { font-size: 1.5rem; color: var(--primary-blue); margin: 10px 0 5px; }
         .logo-header p { color: var(--accent-pink); font-size: 0.85rem; font-weight: bold; margin: 0; }
 
-        .card { background: #fff; border-radius: 20px; padding: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #bbdefb; }
-        .card h3 { margin-top: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+        .card { background: #fff; border-radius: 25px; padding: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #bbdefb; }
+        .card h3 { margin-top: 0; font-size: 1.1rem; border-bottom: 2px solid #f0f4f8; padding-bottom: 10px; }
         
         .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 550px; }
-        th { background: #fce4ec; color: #ad1457; padding: 12px; text-align: left; font-size: 0.8rem; border-bottom: 2px solid #f8bbd0; }
-        td { padding: 10px 12px; border-bottom: 1px solid #f0f4f8; font-size: 0.8rem; vertical-align: middle; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th { background: #fce4ec; color: #ad1457; padding: 12px; text-align: left; font-size: 0.75rem; }
+        td { padding: 12px; border-bottom: 1px solid #f0f4f8; font-size: 0.85rem; vertical-align: middle; }
+
+        /* จุดสถานะ - แสดงแค่จุดตามสั่ง */
+        .dot { height: 15px; width: 15px; border-radius: 50%; display: inline-block; }
+        .dot-online { background-color: #4caf50; box-shadow: 0 0 10px #4caf50; }
+        .dot-offline { background-color: #ff5252; box-shadow: 0 0 10px #ff5252; }
+
+        .status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 10px; }
+        .status-item { 
+            padding: 8px; border-radius: 12px; background: #fff; border: 1px solid #eee; 
+            text-align: center; font-size: 0.7rem; font-weight: bold; color: #999; 
+        }
+        .status-item.active { background: var(--pastel-green); color: #2e7d32; border-color: #a5d6a7; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+        button { cursor: pointer; border: none; font-weight: 600; border-radius: 12px; transition: 0.3s; padding: 8px 12px; font-size: 0.75rem; margin-left: 4px; }
+        button:hover { transform: translateY(-2px); opacity: 0.8; }
+        
+        .btn-perm { background: var(--pastel-pink); color: #ad1457; border: 1px solid #f8bbd0; }
+        .btn-add { background: var(--pastel-green); color: #2e7d32; border: 1px solid #c8e6c9; }
+        .btn-del { background: var(--pastel-red); color: #c62828; border: 1px solid #ffcdd2; }
+        .btn-ban { background: var(--pastel-orange); color: #ef6c00; border: 1px solid #ffe0b2; }
+        .btn-kick { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
 
         .add-day-box { 
-            display: none; 
-            background: var(--soft-purple); 
-            padding: 10px; 
-            border-radius: 12px; 
-            margin-top: 8px; 
-            border: 1px dashed #ce93d8;
-            animation: slideDown 0.3s ease-out;
+            display: none; background: #ffffff; padding: 15px; border-radius: 20px; margin-top: 10px; 
+            border: 2px solid var(--pastel-green); box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center;
         }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
-        .input-mini { width: 70px; padding: 6px; border-radius: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold; }
-        .confirm-mini-btn { background: #ab47bc; color: white; padding: 6px 12px; font-size: 0.7rem; border-radius: 8px; margin-left: 5px; }
+        .input-mini { width: 80px; padding: 10px; border-radius: 12px; border: 2px solid #e8f5e9; text-align: center; font-size: 1rem; color: #2e7d32; outline: none; margin-bottom: 8px; }
+        .btn-confirm-cute { background: #4caf50; color: white; padding: 10px 20px; border-radius: 12px; width: 100%; font-size: 0.85rem; box-shadow: 0 4px 0 #388e3c; }
 
-        button { cursor: pointer; border: none; font-weight: 600; border-radius: 8px; transition: 0.2s; padding: 8px 12px; }
-        button:active { transform: scale(0.95); }
-        
-        .plus-btn { background: #4caf50; color: white; font-size: 0.75rem; padding: 6px 10px; }
-        .perm-btn { background: #7b1fa2; color: white; font-size: 0.75rem; padding: 6px 10px; margin-left: 4px; }
-        .del-btn { background: #e53935; color: white; font-size: 0.75rem; padding: 6px 10px; margin-left: 4px; }
-        
-        .kick-btn { background: #ffb74d; color: white; }
-        .ban-btn { background: #ff5252; color: white; margin-left: 4px; }
-        .unban-btn { background: #40c4ff; color: white; width: 100%; }
-        
-        .add-btn { background: var(--primary-blue); color: white; padding: 12px 15px; border-radius: 12px; flex: 1; }
-        .add-perm-btn { background: #e91e63; color: white; padding: 12px 15px; border-radius: 12px; flex: 1; }
-        .login-btn { background: linear-gradient(90deg, #2196f3, #ff4081); color: white; width: 100%; padding: 15px; font-size: 1.1rem; border-radius: 15px; }
-
-        .code-badge { font-size: 0.7rem; padding: 6px; border-radius: 6px; text-align: center; border: 1px solid #eee; font-weight: bold; background: #fff; color: #bbb;}
-        .code-badge.active { background: #e8f5e9; color: #2e7d32; border-color: #4caf50; }
-        .code-status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 6px; margin: 10px 0; max-height: 150px; overflow-y: auto; padding: 10px; background: #f9f9f9; border-radius: 12px; }
-        
-        .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
-        .online { background: var(--success-green); box-shadow: 0 0 8px var(--success-green); }
-        .offline { background: #cfd8dc; }
-
-        #loginOverlay { position: fixed; inset: 0; background: linear-gradient(135deg, #e3f2fd 0%, #fce4ec 100%); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .login-card { background: white; width: 100%; max-width: 350px; padding: 30px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; }
-        .login-card input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 15px; text-align: center; font-size: 1rem; }
-        
-        .expired-text { color: #ff5252; font-weight: bold; }
-        .valid-text { color: #2e7d32; font-weight: bold; }
-        .perm-text { color: #7b1fa2; font-weight: bold; }
-        #logoutBtn { background: #90a4ae; color: white; padding: 12px; width: 100%; margin-top: 10px; border-radius: 12px; font-size: 0.9rem; }
+        #loginOverlay { position: fixed; inset: 0; background: linear-gradient(135deg, #e3f2fd 0%, #fce4ec 100%); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .login-card { background: white; width: 90%; max-width: 350px; padding: 30px; border-radius: 35px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        .login-card input { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 15px; border: 1px solid #ddd; text-align: center; }
     </style>
 </head>
 <body>
@@ -93,10 +85,10 @@
     <div class="login-card">
         <div class="logo-header">
             <img src="https://i.pinimg.com/1200x/7a/82/11/7a8211a2161799550aa868aaab6d5c84.jpg" alt="Logo">
-            <h2>Admin Login</h2>
+            <h2 style="color: var(--primary-blue);">Admin Login</h2>
         </div>
         <input id="userPass" type="password" placeholder="ใส่รหัสผ่านแอดมิน">
-        <button class="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
+        <button onclick="doLogin()" style="background: var(--primary-blue); color:white; width:100%; padding:15px; border-radius:15px; font-size: 1rem;">เข้าสู่ระบบ ✨</button>
     </div>
 </div>
 
@@ -108,17 +100,21 @@
     </div>
 
     <div class="card">
-        <h3 style="color: var(--primary-blue);">✨ สร้างและต่ออายุรหัส</h3>
-        <div style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;">
-            <input id="newCodeInput" type="text" placeholder="ชื่อรหัสใหม่..." style="flex: 2; min-width: 150px; padding: 12px; border-radius: 12px; border: 1px solid #bbdefb; outline: none;">
-            <button class="add-btn" onclick="addNewCode(false)">➕ สร้าง (30วัน)</button>
-            <button class="add-perm-btn" onclick="addNewCode(true)">♾️ สร้างรหัสถาวร</button>
+        <h3 style="color: var(--primary-blue);">🟢 สถานะออนไลน์เรียลไทม์</h3>
+        <div id="codeStatusGrid" class="status-grid"></div>
+    </div>
+
+    <div class="card">
+        <h3>✨ สร้างรหัสลูกค้าใหม่</h3>
+        <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+            <input id="newCodeInput" type="text" placeholder="ชื่อรหัสใหม่..." style="flex:2; padding:12px; border-radius:15px; border:2px solid #e3f2fd; outline: none;">
+            <button onclick="addNewCode(false)" style="background: #2196f3; color:white;">➕ 30วัน</button>
+            <button onclick="addNewCode(true)" style="background: #e91e63; color:white;">♾️ ถาวร</button>
         </div>
-        
-        <div class="table-wrapper" style="max-height: 450px;">
+        <div class="table-wrapper">
             <table>
                 <thead>
-                    <tr><th>ชื่อรหัส</th><th>วันหมดอายุ / สถานะ</th><th align="right">จัดการ</th></tr>
+                    <tr><th>รหัส</th><th>หมดอายุ / สถานะ</th><th align="right">จัดการ</th></tr>
                 </thead>
                 <tbody id="customCodeTableBody"></tbody>
             </table>
@@ -126,7 +122,7 @@
     </div>
 
     <div class="card">
-        <h3 style="color:#2e7d32;"><span class="dot online"></span> ยูสเซอร์ที่กำลังเล่น</h3>
+        <h3 style="color:#2e7d32;">👥 ยูสเซอร์ที่ออนไลน์</h3>
         <div class="table-wrapper">
             <table>
                 <thead>
@@ -137,11 +133,10 @@
         </div>
     </div>
 
-    <button id="logoutBtn" onclick="doLogout()">ออกจากระบบแอดมิน</button>
+    <button onclick="doLogout()" style="background:#90a4ae; color:white; width:100%; padding:12px; border-radius:15px; margin-bottom:30px;">ออกจากระบบ</button>
 </div>
 
 <script>
-// --- CONFIG FIREBASE ---
 const firebaseConfig = {
     apiKey: "AIzaSyC1iAT_0vKk6Uew2VJtN3_wx4JszVTTTjY",
     authDomain: "junior-nior.firebaseapp.com",
@@ -155,128 +150,127 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 const ADMIN_PASS = "adminwinjuniorkmcn0602";
-const PERM_VAL = 32503680000000; // ค่าสำหรับสถานะถาวร
+const PERM_VAL = 32503680000000;
+const USER_CODES = ["winju0101","juwin0202","jujuwin0303","lekwinju0404","winlek0505","jueiei0606","juny0707","niorwin0808","winnior0909","winarrai1010","lnwwinju1111","julnwwin1212","asdf1313","zxcv1414","qwer1616","popo1717","ziber1818","fahsai1919","kaimook2020","rich9999","gold8888","lucky789","money168","winwin24","star555","smile11","power88","bestwin9","junior007"];
 
-function doLogin() {
-    const p = document.getElementById("userPass").value;
-    if(p === ADMIN_PASS) { sessionStorage.setItem("isAdminActive", "true"); checkAuth(); }
-    else { alert("รหัสผ่านไม่ถูกต้อง!"); }
-}
-
+function doLogin() { if(document.getElementById("userPass").value === ADMIN_PASS) { sessionStorage.setItem("isAdminActive", "true"); checkAuth(); } else { alert("รหัสผ่านไม่ถูกต้อง!"); } }
 function doLogout() { sessionStorage.clear(); location.reload(); }
-
-function checkAuth() {
-    if(sessionStorage.getItem("isAdminActive") === "true") {
-        document.getElementById("loginOverlay").style.display = "none";
-        document.getElementById("main").style.display = "block";
-        loadData();
-    }
-}
+function checkAuth() { if(sessionStorage.getItem("isAdminActive") === "true") { document.getElementById("loginOverlay").style.display = "none"; document.getElementById("main").style.display = "block"; loadData(); } }
 
 function loadData() {
     db.ref().on('value', (snapshot) => {
         const data = snapshot.val() || {};
         const custom = data.custom_codes || {};
         const online = data.online_users || {};
-
-        // 1. แสดงตารางรหัสทั้งหมด
+        
         const customTbody = document.getElementById("customCodeTableBody");
         customTbody.innerHTML = "";
         Object.keys(custom).sort().forEach(code => {
-            const expTime = custom[code].expireAt;
-            const isPerm = expTime >= PERM_VAL;
-            const diff = expTime - Date.now();
-            const isExpired = !isPerm && diff <= 0;
-            
-            let statusHtml = "";
-            if(isPerm) {
-                statusHtml = `<div class="perm-text">♾️ถาวร♾️</div>`;
-            } else {
-                const dayLeft = Math.ceil(diff/(1000*60*60*24));
-                statusHtml = `
-                    <div class="${isExpired ? 'expired-text' : 'valid-text'}">${new Date(expTime).toLocaleDateString('th-TH')}</div>
-                    <div style="font-size:0.7rem; color:#666;">${isExpired ? 'หมดอายุแล้ว' : 'เหลือ '+dayLeft+' วัน'}</div>`;
-            }
-
+            const exp = custom[code].expireAt;
+            const isPerm = exp >= PERM_VAL;
             customTbody.innerHTML += `
                 <tr>
                     <td><strong>${code}</strong></td>
-                    <td>
-                        ${statusHtml}
-                        <div id="box-${code}" class="add-day-box">
-                             <input type="number" id="input-${code}" class="input-mini" value="30">
-                             <button class="confirm-mini-btn" onclick="saveNewDays('${code}')">ตกลง</button>
-                        </div>
-                    </td>
+                    <td style="color:${isPerm?'#7b1fa2':'#2e7d32'}; font-weight:bold;">${isPerm ? '♾️ถาวร♾️' : new Date(exp).toLocaleDateString('th-TH')}</td>
                     <td align="right">
-                        <button class="plus-btn" onclick="toggleAddDay('${code}')">➕ต่ออายุ</button>
-                        <button class="perm-btn" style="background:${isPerm ? '#9e9e9e':'#7b1fa2'}" onclick="togglePermanent('${code}', ${isPerm})">
-                            ${isPerm ? '🔓ยกเลิก' : '♾️ถาวร'}
-                        </button>
-                        <button class="del-btn" onclick="deleteCode('${code}')">❗ลบ</button>
+                        <button class="btn-perm" onclick="togglePermanent('${code}', ${isPerm})">♾️ถาวร♾️</button>
+                        <button class="btn-add" onclick="toggleAddDay('${code}')">🗓 เพิ่มวัน</button>
+                        <button class="btn-del" onclick="deleteCode('${code}')">🗑️ ลบ</button>
+                        <div id="box-${code}" class="add-day-box">
+                            <p style="margin:0 0 10px; font-size:0.8rem; color:#666;">ระบุจำนวนวันที่ต้องการเพิ่ม 🌿</p>
+                            <input type="number" id="input-${code}" class="input-mini" value="30">
+                            <button class="btn-confirm-cute" onclick="saveNewDays('${code}')">ยืนยันการเพิ่มวัน ✨</button>
+                        </div>
                     </td>
                 </tr>`;
         });
 
-        // 2. แสดงตารางคนออนไลน์
         const onlineTbody = document.getElementById("onlineListTableBody");
         onlineTbody.innerHTML = "";
         Object.keys(online).forEach(key => {
             const u = online[key];
-            onlineTbody.innerHTML += `
-                <tr>
-                    <td><strong>${u.name || 'N/A'}</strong></td>
-                    <td>${u.pass || key}</td>
-                    <td><span class="dot ${u.status === 'online' ? 'online' : 'offline'}"></span></td>
-                    <td><button class="kick-btn" onclick="kickUser('${key}')">เตะ</button></td>
-                </tr>`;
+            const isOnline = u.status === 'online';
+            onlineTbody.innerHTML += `<tr>
+                <td>${u.name}</td>
+                <td>${key}</td>
+                <td align="center"><span class="dot ${isOnline ? 'dot-online' : 'dot-offline'}"></span></td>
+                <td><button class="btn-kick" onclick="kickUser('${key}')">เตะ</button><button class="btn-ban" onclick="banUser('${key}')">🚫 แบน</button></td>
+            </tr>`;
+        });
+
+        const grid = document.getElementById("codeStatusGrid");
+        grid.innerHTML = "";
+        const allCodes = Array.from(new Set([...USER_CODES, ...Object.keys(custom)])).sort();
+        allCodes.forEach(code => {
+            const isOnline = online[code] && online[code].status === 'online';
+            grid.innerHTML += `<div class="status-item ${isOnline ? 'active' : ''}">${code}</div>`;
         });
     });
 }
 
-// --- ฟังก์ชันการจัดการ ---
-
-window.deleteCode = (code) => { 
-    if(confirm(`ยืนยันการลบรหัส [${code}]?\nยูสเซอร์จะถูกเตะออกทันที!`)) {
-        // ลบทั้งรหัสและชื่อในรายการออนไลน์เพื่อให้เด้งออก
-        db.ref('custom_codes/' + code).remove(); 
-        db.ref('online_users/' + code).remove(); 
-    }
+window.addNewCode = (isP) => {
+    const code = document.getElementById("newCodeInput").value.trim();
+    if(!code) return alert("ใส่ชื่อรหัสด้วยนะจ๊ะ");
+    const exp = isP ? PERM_VAL : Date.now() + (30*24*60*60*1000);
+    db.ref('custom_codes/'+code).set({ expireAt: exp });
 };
 
-window.addNewCode = (isPermanent) => {
-    const code = document.getElementById("newCodeInput").value.trim();
-    if(!code) return alert("กรุณาใส่ชื่อรหัส");
-    const exp = isPermanent ? PERM_VAL : Date.now() + (30 * 24 * 60 * 60 * 1000);
-    db.ref('custom_codes/' + code).set({ expireAt: exp, createdAt: Date.now() }).then(() => {
-        document.getElementById("newCodeInput").value = "";
+window.deleteCode = (c) => { 
+    Swal.fire({
+        title: 'ยืนยันการลบ 🗑️',
+        text: `ต้องการลบรหัส [${c}] ใช่ไหมคะ?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ffcdd2',
+        cancelButtonColor: '#eee',
+        confirmButtonText: 'ใช่ ลบเลย!',
+        cancelButtonText: 'ยกเลิก',
+        borderRadius: '25px'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            db.ref('custom_codes/'+c).remove(); 
+            db.ref('online_users/'+c).remove();
+            Swal.fire('ลบแล้วเรียบร้อย! ✨', '', 'success');
+        }
     });
 };
 
-window.togglePermanent = (code, currentIsPerm) => {
-    let newExp = currentIsPerm ? Date.now() + (30 * 24 * 60 * 60 * 1000) : PERM_VAL;
-    db.ref('custom_codes/' + code).update({ expireAt: newExp });
+window.kickUser = (c) => { if(confirm('เตะคนนี้ออกชั่วคราวนะ?')) db.ref('online_users/'+c).remove(); };
+window.banUser = (c) => { 
+    if(confirm('จะแบนรหัสนี้จริงๆ ใช่ไหม?')) { 
+        db.ref('custom_codes/'+c).remove(); 
+        db.ref('online_users/'+c).remove(); 
+    } 
 };
 
-window.toggleAddDay = (code) => {
-    const box = document.getElementById(`box-${code}`);
-    box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+window.toggleAddDay = (c) => { const el = document.getElementById(`box-${c}`); el.style.display = el.style.display === 'block' ? 'none' : 'block'; };
+
+window.saveNewDays = (c) => {
+    const days = document.getElementById(`input-${c}`).value;
+    db.ref('custom_codes/'+c).once('value', s => {
+        let cur = s.val() ? s.val().expireAt : Date.now();
+        if(cur >= PERM_VAL || cur < Date.now()) cur = Date.now();
+        db.ref('custom_codes/'+c).update({ expireAt: cur + (parseInt(days)*24*60*60*1000) });
+        document.getElementById(`box-${c}`).style.display = 'none';
+        Swal.fire('เพิ่มวันสำเร็จ! 🗓️', '', 'success');
+    });
 };
 
-window.saveNewDays = (code) => {
-    const days = document.getElementById(`input-${code}`).value;
-    if(days && !isNaN(days)) {
-        const daysInMs = parseInt(days) * 24 * 60 * 60 * 1000;
-        db.ref('custom_codes/' + code).once('value', (snap) => {
-            let currentExp = snap.exists() ? snap.val().expireAt : Date.now();
-            if (currentExp >= PERM_VAL || currentExp < Date.now()) currentExp = Date.now();
-            db.ref('custom_codes/' + code).update({ expireAt: currentExp + daysInMs });
-            document.getElementById(`box-${code}`).style.display = 'none';
-        });
-    }
+window.togglePermanent = (c, isP) => { 
+    Swal.fire({
+        title: isP ? 'ยกเลิกถาวร?' : 'ตั้งค่าเป็นถาวร ♾️',
+        text: isP ? 'ต้องการเปลี่ยนเป็นแบบรายวัน?' : 'รหัสนี้จะใช้งานได้ตลอดไปเลยนะ?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#fce4ec',
+        confirmButtonText: 'ยืนยัน ✨',
+        borderRadius: '25px'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            db.ref('custom_codes/'+c).update({ expireAt: isP ? Date.now() + (30*24*60*60*1000) : PERM_VAL });
+        }
+    });
 };
-
-window.kickUser = (key) => { if(confirm(`เตะยูสเซอร์ [${key}]?`)) db.ref('online_users/' + key).remove(); };
 
 checkAuth();
 </script>
