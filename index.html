@@ -13,126 +13,119 @@
         :root {
             --primary-blue: #1565c0;
             --pastel-blue: #e3f2fd;
-            --pastel-pink: #fce4ec; 
-            --pastel-green: #e8f5e9; 
-            --pastel-red: #ffebee; 
-            --pastel-orange: #fff3e0; 
-            --accent-pink: #ff4081;
+            --vivid-green: #4caf50;
+            --vivid-red: #e53935;
+            --offline-gray: #bdc3c7;
         }
+
+        /* SweetAlert Style */
+        .swal2-popup { border-radius: 25px !important; padding: 2em !important; width: 340px !important; }
+        .swal2-title { color: #444 !important; font-size: 1.5rem !important; font-weight: bold !important; }
+        .swal2-confirm { border-radius: 12px !important; padding: 12px 20px !important; font-weight: bold !important; background-color: #3b82f6 !important; }
+        .swal2-cancel { border-radius: 12px !important; padding: 12px 20px !important; background-color: #6c757d !important; }
 
         * { box-sizing: border-box; }
-        html, body { margin: 0; padding: 0; min-height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--pastel-blue); }
-        body { display: flex; flex-direction: column; align-items: center; padding: 20px 10px; }
+        html, body { margin: 0; padding: 0; min-height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--pastel-blue); color: #444; }
+        body { display: flex; flex-direction: column; align-items: center; padding: 15px 10px; }
+        .container { width: 100%; max-width: 700px; }
         
-        .container { width: 100%; max-width: 750px; }
+        .header-box { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; background: white; padding: 10px 15px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); width: 100%; border: 1px solid #d1e9ff; }
+        .header-box img { width: 50px; height: 50px; border-radius: 12px; border: 2px solid var(--primary-blue); object-fit: cover; }
+        .header-box h2 { margin: 0; font-size: 1.1rem; color: var(--primary-blue); }
+
+        .card { background: #fff; border-radius: 20px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #d1e9ff; }
+        .card h3 { margin: 0 0 12px 0; font-size: 1rem; color: var(--primary-blue); border-bottom: 2px solid #f0f4f8; padding-bottom: 8px; }
         
-        .logo-header { text-align: center; margin-bottom: 20px; }
-        .logo-header img { 
-            width: 100px; height: 100px; border-radius: 20px; 
-            object-fit: cover; border: 4px solid #fff; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-        }
-        .logo-header h1 { font-size: 1.5rem; color: var(--primary-blue); margin: 10px 0 5px; }
-        .logo-header p { color: var(--accent-pink); font-size: 0.85rem; font-weight: bold; margin: 0; }
+        .grid-status { display: grid; grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 6px; margin-top: 5px; }
+        .status-item { padding: 8px 2px; border: 1px solid #eee; border-radius: 12px; text-align: center; font-size: 0.65rem; font-weight: bold; color: #888; background: #fafafa; }
+        .status-online { background-color: #e8f5e9; border-color: #4caf50; color: #2e7d32; box-shadow: 0 0 8px rgba(76,175,80,0.3); }
 
-        .card { background: #fff; border-radius: 25px; padding: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #bbdefb; }
-        .card h3 { margin-top: 0; font-size: 1.1rem; border-bottom: 2px solid #f0f4f8; padding-bottom: 10px; }
-        
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
-        th { background: #fce4ec; color: #ad1457; padding: 12px; text-align: left; font-size: 0.75rem; }
-        td { padding: 12px; border-bottom: 1px solid #f0f4f8; font-size: 0.85rem; vertical-align: middle; }
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
+        .dot-online { background-color: var(--vivid-green); box-shadow: 0 0 8px var(--vivid-green); }
+        .dot-offline { background-color: var(--offline-gray); }
 
-        .dot { height: 15px; width: 15px; border-radius: 50%; display: inline-block; }
-        .dot-online { background-color: #4caf50; box-shadow: 0 0 10px #4caf50; }
-        .dot-offline { background-color: #ff5252; box-shadow: 0 0 10px #ff5252; }
+        .create-box { display: flex; flex-direction: column; gap: 8px; }
+        .create-box input { padding: 12px; border-radius: 12px; border: 1.5px solid #eee; outline: none; }
+        .create-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .btn-new-30 { background: #ce93d8; color: white; padding: 10px; border-radius: 10px; font-weight: bold; border:none; cursor: pointer; }
+        .btn-new-perm { background: #4fc3f7; color: white; padding: 10px; border-radius: 10px; font-weight: bold; border:none; cursor: pointer; }
 
-        .status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; margin-top: 10px; }
-        .status-item { 
-            padding: 8px; border-radius: 12px; background: #fff; border: 1px solid #eee; 
-            text-align: center; font-size: 0.7rem; font-weight: bold; color: #999; 
-        }
-        .status-item.active { background: var(--pastel-green); color: #2e7d32; border-color: #a5d6a7; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        td { padding: 10px 8px; border-bottom: 1px solid #f9f9f9; vertical-align: middle; }
 
-        button { cursor: pointer; border: none; font-weight: 600; border-radius: 12px; transition: 0.3s; padding: 8px 12px; font-size: 0.75rem; margin-left: 4px; }
-        button:hover { transform: translateY(-2px); opacity: 0.8; }
-        
-        .btn-perm { background: var(--pastel-pink); color: #ad1457; border: 1px solid #f8bbd0; }
-        .btn-add { background: var(--pastel-green); color: #2e7d32; border: 1px solid #c8e6c9; }
-        .btn-del { background: var(--pastel-red); color: #c62828; border: 1px solid #ffcdd2; }
-        .btn-ban { background: var(--pastel-orange); color: #ef6c00; border: 1px solid #ffe0b2; }
-        .btn-kick { background: #e3f2fd; color: #1565c0; border: 1px solid #bbdefb; }
+        button { cursor: pointer; border: none; font-weight: 600; border-radius: 8px; padding: 6px 10px; font-size: 0.7rem; }
+        .btn-perm { background: #fdf2f8; color: #db2777; margin-right: 3px; }
+        .btn-add { background: #f0fdf4; color: #16a34a; margin-right: 3px; }
+        .btn-del { background: #fef2f2; color: #dc2626; }
+        .btn-kick { background: #fffde7; color: #fbc02d; margin-right: 5px; }
+        .btn-ban { background: #ffebee; color: #c62828; }
+        .btn-unban { background: #e8f5e9; color: #2e7d32; }
 
-        .add-day-box { 
-            display: none; background: #ffffff; padding: 15px; border-radius: 20px; margin-top: 10px; 
-            border: 2px solid var(--pastel-green); box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center;
-        }
-        @keyframes popIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-
-        .input-mini { width: 80px; padding: 10px; border-radius: 12px; border: 2px solid #e8f5e9; text-align: center; font-size: 1rem; color: #2e7d32; outline: none; margin-bottom: 8px; }
-        .btn-confirm-cute { background: #4caf50; color: white; padding: 10px 20px; border-radius: 12px; width: 100%; font-size: 0.85rem; box-shadow: 0 4px 0 #388e3c; }
-
-        #loginOverlay { position: fixed; inset: 0; background: linear-gradient(135deg, #e3f2fd 0%, #fce4ec 100%); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .login-card { background: white; width: 90%; max-width: 350px; padding: 30px; border-radius: 35px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
-        .login-card input { width: 100%; padding: 15px; margin-bottom: 15px; border-radius: 15px; border: 1px solid #ddd; text-align: center; }
+        #loginOverlay { position: fixed; inset: 0; background: #e3f2fd; display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .login-card { background: white; width: 85%; max-width: 320px; padding: 25px; border-radius: 25px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div id="loginOverlay">
     <div class="login-card">
-        <div class="logo-header">
-            <img src="https://i.pinimg.com/1200x/7a/82/11/7a8211a2161799550aa868aaab6d5c84.jpg" alt="Logo">
-            <h2 style="color: var(--primary-blue);">Admin Login</h2>
-        </div>
-        <input id="userPass" type="password" placeholder="ใส่รหัสผ่านแอดมิน">
-        <button onclick="doLogin()" style="background: var(--primary-blue); color:white; width:100%; padding:15px; border-radius:15px; font-size: 1rem;">เข้าสู่ระบบ ✨</button>
+        <img src="https://i.pinimg.com/1200x/7a/82/11/7a8211a2161799550aa868aaab6d5c84.jpg" style="width:100px; height:100px; object-fit:cover; border-radius:20px; margin-bottom:15px; border: 3px solid #1565c0;">
+        <h3>Admin Login</h3>
+        <input id="userPass" type="password" placeholder="รหัสผ่านแอดมิน" style="width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border:1px solid #ddd; text-align:center;">
+        <button onclick="doLogin()" style="background: var(--primary-blue); color:white; width:100%; padding:12px; border-radius:12px; border:none; font-weight:bold;">เข้าสู่ระบบ ✨</button>
     </div>
 </div>
 
-<div id="main" class="container" style="display:none;">
-    <div class="logo-header">
-        <img src="https://i.pinimg.com/1200x/7a/82/11/7a8211a2161799550aa868aaab6d5c84.jpg" alt="Logo">
-        <h1>แผงควบคุมแอดมิน</h1>
-        <p>🌟 LEKWIN JUNIOR SYSTEM 🌟</p>
-    </div>
-
-    <div class="card">
-        <h3 style="color: var(--primary-blue);">🟢 สถานะออนไลน์เรียลไทม์</h3>
-        <div id="codeStatusGrid" class="status-grid"></div>
+<div id="main" class="container" style="display:none; padding-top: 20px;">
+    <div class="header-box">
+        <img src="https://i.pinimg.com/1200x/7a/82/11/7a8211a2161799550aa868aaab6d5c84.jpg" alt="Admin">
+        <div>
+            <h2>ADMIN MONITOR</h2>
+            <small style="color: #888;">Real-time System Control</small>
+        </div>
     </div>
 
     <div class="card">
         <h3>✨ สร้างรหัสลูกค้าใหม่</h3>
-        <div style="display: flex; gap: 8px; margin-bottom: 15px;">
-            <input id="newCodeInput" type="text" placeholder="ชื่อรหัสใหม่..." style="flex:2; padding:12px; border-radius:15px; border:2px solid #e3f2fd; outline: none;">
-            <button onclick="addNewCode(false)" style="background: #2196f3; color:white;">➕ 30วัน</button>
-            <button onclick="addNewCode(true)" style="background: #e91e63; color:white;">♾️ ถาวร</button>
-        </div>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr><th>รหัส</th><th>หมดอายุ / สถานะ</th><th align="right">จัดการ</th></tr>
-                </thead>
-                <tbody id="customCodeTableBody"></tbody>
-            </table>
+        <div class="create-box">
+            <input id="newCodeInput" type="text" placeholder="พิมพ์ชื่อรหัส...">
+            <div class="create-btns">
+                <button class="btn-new-30" onclick="addNewCode(false)">📞New 30day📞</button>
+                <button class="btn-new-perm" onclick="addNewCode(true)">♾️ ถาวร♾️</button>
+            </div>
         </div>
     </div>
 
     <div class="card">
-        <h3 style="color:#2e7d32;">👥 ยูสเซอร์ที่ออนไลน์</h3>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr><th>ชื่อ</th><th>รหัส</th><th>สถานะ</th><th>จัดการ</th></tr>
-                </thead>
-                <tbody id="onlineListTableBody"></tbody>
-            </table>
-        </div>
+        <h3>🌟 🟢 สถานะออนไลน์เรียลไทม์</h3>
+        <div id="statusGrid" class="grid-status"></div>
     </div>
 
-    <button onclick="doLogout()" style="background:#90a4ae; color:white; width:100%; padding:12px; border-radius:15px; margin-bottom:30px;">ออกจากระบบ</button>
+    <div class="card">
+        <h3>👥 ยูสเซอร์ที่ออนไลน์ (Real-time)</h3>
+        <table>
+            <thead>
+                <tr><th width="30"></th><th>รหัส</th><th>ชื่อ/อุปกรณ์</th><th align="right">จัดการ</th></tr>
+            </thead>
+            <tbody id="onlineListTbody"></tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3>✨ รหัสลูกค้าใหม่ ✨</h3>
+        <table>
+            <tbody id="newCodesTbody"></tbody>
+        </table>
+    </div>
+
+    <div class="card" id="bannedCard" style="border: 1px solid #ffcdd2;">
+        <h3 style="color: #c62828;">🚫 รายการรหัสที่ถูกแบน</h3>
+        <table>
+            <tbody id="bannedListTbody"></tbody>
+        </table>
+    </div>
+
+    <button onclick="doLogout()" style="background:#b0bec5; color:white; width:100%; padding:12px; border-radius:12px; margin-bottom:40px; font-weight:bold; border:none;">LOGOUT</button>
 </div>
 
 <script>
@@ -149,158 +142,155 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 const ADMIN_PASS = "adminwinjuniorkmcn0602";
-const PERM_VAL = 32503680000000; 
-const USER_CODES = ["winju0101","juwin0202","jujuwin0303","lekwinju0404","winlek0505","jueiei0606","juny0707","niorwin0808","winnior0909","winarrai1010","lnwwinju1111","julnwwin1212","asdf1313","zxcv1414","qwer1616","popo1717","ziber1818","fahsai1919","kaimook2020","rich9999","gold8888","lucky789","money168","winwin24","star555","smile11","power88","bestwin9","junior007"];
+const PERM_VAL = 32503680000000;
+const STATUS_LIST = ["asdf1313", "bestwin9", "fahsai1919", "gold8888", "jueiei0606", "jujuwin0303", "julnwwin1212", "junior007", "juny0707", "juwin0202", "kaimook2020", "lekwinju0404", "lnwwinju1111", "lucky789", "money168", "niorwin0808", "popo1717", "power88", "qwer1616", "rich9999", "smile11", "star555", "winarrai1010", "winju0101", "winlek0505", "winnior0909", "winwin24", "ziber1818", "zxcv1414"];
 
-function doLogin() { if(document.getElementById("userPass").value === ADMIN_PASS) { sessionStorage.setItem("isAdminActive", "true"); checkAuth(); } else { alert("รหัสผ่านไม่ถูกต้อง!"); } }
+function doLogin() { if(document.getElementById("userPass").value === ADMIN_PASS) { sessionStorage.setItem("isAdminActive", "true"); checkAuth(); } else { Swal.fire('รหัสผ่านไม่ถูกต้อง', '', 'error'); } }
 function doLogout() { sessionStorage.clear(); location.reload(); }
 function checkAuth() { if(sessionStorage.getItem("isAdminActive") === "true") { document.getElementById("loginOverlay").style.display = "none"; document.getElementById("main").style.display = "block"; loadData(); } }
+
+function formatThaiDate(ts) {
+    if (ts >= 3000000000000) return "ไม่มีวันหมดอายุ";
+    const d = new Date(ts);
+    // แสดงเป็น วัน/เดือน/ปีพ.ศ. ย่อ (ปีค.ศ. + 43)
+    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getFullYear() + 43).slice(-2)}`;
+}
 
 function loadData() {
     db.ref().on('value', (snapshot) => {
         const data = snapshot.val() || {};
         const custom = data.custom_codes || {};
         const online = data.online_users || {};
+        const banned = data.banned_codes || {};
         
-        const customTbody = document.getElementById("customCodeTableBody");
-        customTbody.innerHTML = "";
-        Object.keys(custom).sort().forEach(code => {
-            const exp = custom[code].expireAt;
-            const isPerm = exp >= 3000000000000; 
-            
-            let statusHTML = "";
-            if (isPerm) {
-                statusHTML = '<span style="color:#7b1fa2; font-weight:bold;">♾️ ถาวร ♾️</span>';
-            } else {
-                const now = Date.now();
-                const diffTime = exp - now;
-
-                if (diffTime > 0) {
-                    // คำนวณ วัน ชั่วโมง นาที
-                    const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const mins = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
-
-                    const dateString = new Date(exp).toLocaleDateString('th-TH', {
-                        day: '2-digit', month: '2-digit', year: '2-digit'
-                    });
-
-                    statusHTML = `เหลือ <span style="color:#2e7d32; font-weight:bold;">${days} วัน ${hours} ชม. ${mins} นาที</span><br>` + 
-                                 `<small style="color:#666;">(ถึงวันที่ ${dateString})</small>`;
-                } else {
-                    const dateString = new Date(exp).toLocaleDateString('th-TH', {
-                        day: '2-digit', month: '2-digit', year: '2-digit'
-                    });
-                    statusHTML = `<span style="color:#c62828; font-weight:bold;">❌ หมดอายุแล้ว</span><br>` +
-                                 `<small style="color:#666;">(${dateString})</small>`;
-                }
-            }
-
-            customTbody.innerHTML += `
-                <tr>
-                    <td><strong>${code}</strong></td>
-                    <td>${statusHTML}</td>
-                    <td align="right">
-                        <button class="btn-perm" onclick="togglePermanent('${code}', ${isPerm})">♾️ถาวร</button>
-                        <button class="btn-add" onclick="toggleAddDay('${code}')">🗓 เพิ่มวัน</button>
-                        <button class="btn-del" onclick="deleteCode('${code}')">🗑️ ลบ</button>
-                        <div id="box-${code}" class="add-day-box">
-                            <p style="margin:0 0 10px; font-size:0.8rem; color:#666;">ระบุจำนวนวันที่ต้องการเพิ่ม 🌿</p>
-                            <input type="number" id="input-${code}" class="input-mini" value="30">
-                            <button class="btn-confirm-cute" onclick="saveNewDays('${code}')">ยืนยันการเพิ่มวัน ✨</button>
-                        </div>
-                    </td>
-                </tr>`;
-        });
-
-        const onlineTbody = document.getElementById("onlineListTableBody");
+        // 1. ตารางออนไลน์ (ชื่อหายทันทีเมื่อลบ/แบน)
+        const onlineTbody = document.getElementById("onlineListTbody");
         onlineTbody.innerHTML = "";
         Object.keys(online).forEach(key => {
-            const u = online[key];
-            const isOnline = u.status === 'online';
-            onlineTbody.innerHTML += `<tr>
-                <td>${u.name}</td>
-                <td>${key}</td>
-                <td align="center"><span class="dot ${isOnline ? 'dot-online' : 'dot-offline'}"></span></td>
-                <td><button class="btn-kick" onclick="kickUser('${key}')">เตะ</button><button class="btn-ban" onclick="banUser('${key}')">🚫 แบน</button></td>
-            </tr>`;
+            const isExist = custom[key] !== undefined || STATUS_LIST.includes(key);
+            const isBanned = banned[key] !== undefined;
+            if (isExist && !isBanned) {
+                const user = online[key];
+                onlineTbody.innerHTML += `<tr>
+                    <td align="center"><span class="status-dot ${user.status === 'online' ? 'dot-online' : 'dot-offline'}"></span></td>
+                    <td><b>${key}</b></td>
+                    <td><span style="color:#666;">${user.name || '-'}</span></td>
+                    <td align="right">
+                        <button class="btn-kick" onclick="popKick('${key}')">🐾 เตะ</button>
+                        <button class="btn-ban" onclick="popBan('${key}')">🤬 แบน</button>
+                    </td>
+                </tr>`;
+            } else {
+                db.ref('online_users/' + key).remove();
+            }
         });
 
-        const grid = document.getElementById("codeStatusGrid");
+        // 2. สถานะ Grid
+        const grid = document.getElementById("statusGrid");
         grid.innerHTML = "";
-        const allCodes = Array.from(new Set([...USER_CODES, ...Object.keys(custom)])).sort();
-        allCodes.forEach(code => {
+        const allKeys = [...STATUS_LIST, ...Object.keys(custom).filter(k => !STATUS_LIST.includes(k))];
+        allKeys.forEach(code => {
             const isOnline = online[code] && online[code].status === 'online';
-            grid.innerHTML += `<div class="status-item ${isOnline ? 'active' : ''}">${code}</div>`;
+            grid.innerHTML += `<div class="status-item ${isOnline ? 'status-online' : ''}">${code}</div>`;
+        });
+
+        // 3. รหัสลูกค้าใหม่ (แสดงเวลาเหลือแบบละเอียด + วันที่หมดอายุ)
+        const newTbody = document.getElementById("newCodesTbody");
+        newTbody.innerHTML = "";
+        Object.keys(custom).sort().forEach(code => {
+            if (!STATUS_LIST.includes(code) || ["1123asdf", "kaophod11", "tommy40", "zzxx123"].includes(code)) {
+                const exp = custom[code].expireAt;
+                const isPerm = exp >= 3000000000000;
+                let statusHTML = "";
+
+                if (isPerm) {
+                    statusHTML = "<b style='color:#db2777;'>♾️ ถาวร</b>";
+                } else {
+                    const diff = exp - Date.now();
+                    if (diff > 0) {
+                        const d = Math.floor(diff / 86400000);
+                        const h = Math.floor((diff % 86400000) / 3600000);
+                        const m = Math.floor((diff % 3600000) / 60000);
+                        statusHTML = `<span style="color:#2e7d32; font-weight:bold;">เหลือ ${d} วัน ${h} ชม. ${m} นาที</span><br>
+                                      <small style="color:#888;">(ใช้ได้ถึงวันที่ ${formatThaiDate(exp)})</small>`;
+                    } else {
+                        statusHTML = "<span style='color:grey;'>หมดอายุ</span>";
+                    }
+                }
+
+                newTbody.innerHTML += `<tr>
+                    <td><b>${code}</b></td>
+                    <td>${statusHTML}</td>
+                    <td align="right">
+                        <button class="btn-perm" onclick="popPerm('${code}', ${isPerm})">♾️ ถาวร</button>
+                        <button class="btn-add" onclick="popAddDays('${code}')">🌿 เพิ่ม</button>
+                        <button class="btn-del" onclick="popDelete('${code}')">🗑️ ลบ</button>
+                    </td>
+                </tr>`;
+            }
+        });
+
+        // 4. รายการแบน
+        const banTbody = document.getElementById("bannedListTbody");
+        banTbody.innerHTML = "";
+        Object.keys(banned).forEach(c => {
+            banTbody.innerHTML += `<tr><td><b style="color:red;">🚫 ${c}</b></td><td align="right"><button class="btn-unban" onclick="popUnban('${c}')">🔓 ปลด</button></td></tr>`;
         });
     });
 }
 
-window.addNewCode = (isP) => {
+function addNewCode(isP) {
     const code = document.getElementById("newCodeInput").value.trim();
-    if(!code) return alert("ใส่ชื่อรหัสด้วยนะจ๊ะ");
-    const exp = isP ? PERM_VAL : Date.now() + (30*24*60*60*1000);
-    db.ref('custom_codes/'+code).set({ expireAt: exp });
+    if(!code) return;
+    db.ref('custom_codes/'+code).set({ expireAt: isP ? PERM_VAL : Date.now()+(30*86400000) });
     document.getElementById("newCodeInput").value = "";
-};
+    Swal.fire({ icon: 'success', title: 'สร้างสำเร็จ', timer: 800, showConfirmButton: false });
+}
 
-window.deleteCode = (c) => { 
-    Swal.fire({
-        title: 'ยืนยันการลบ 🗑️',
-        text: `ต้องการลบรหัส [${c}] ใช่ไหมคะ?`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ffcdd2',
-        cancelButtonColor: '#eee',
-        confirmButtonText: 'ใช่ ลบเลย!',
-        cancelButtonText: 'ยกเลิก',
-        borderRadius: '25px'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            db.ref('custom_codes/'+c).remove(); 
-            db.ref('online_users/'+c).remove();
-            Swal.fire('ลบแล้วเรียบร้อย! ✨', '', 'success');
-        }
-    });
-};
+function popKick(c) {
+    Swal.fire({ title: 'เตะผู้ใช้?', text: 'ผู้ใช้จะเด้งออกจากระบบ', showCancelButton: true, confirmButtonText: 'ยืนยัน ✨', cancelButtonText: 'Cancel' })
+    .then((r) => { if(r.isConfirmed) db.ref('online_users/'+c).remove(); });
+}
 
-window.kickUser = (c) => { if(confirm('เตะคนนี้ออกชั่วคราวนะ?')) db.ref('online_users/'+c).remove(); };
-window.banUser = (c) => { 
-    if(confirm('จะแบนรหัสนี้จริงๆ ใช่ไหม?')) { 
+function popDelete(c) {
+    Swal.fire({ title: 'ลบรหัสนี้?', text: 'ข้อมูลจะหายไปถาวรจากฐานข้อมูล', showCancelButton: true, confirmButtonText: 'ยืนยัน ✨', cancelButtonText: 'Cancel' })
+    .then((r) => { if(r.isConfirmed) { 
         db.ref('custom_codes/'+c).remove(); 
         db.ref('online_users/'+c).remove(); 
-    } 
-};
+        db.ref('banned_codes/'+c).remove();
+        Swal.fire({ title: 'ลบเรียบร้อย!', icon: 'success', timer: 800, showConfirmButton: false });
+    }});
+}
 
-window.toggleAddDay = (c) => { const el = document.getElementById(`box-${c}`); el.style.display = el.style.display === 'block' ? 'none' : 'block'; };
+function popBan(c) {
+    Swal.fire({ title: 'แบนรหัสนี้?', text: 'รหัสจะเข้าใช้งานไม่ได้จนกว่าจะปลดแบน', showCancelButton: true, confirmButtonText: 'ยืนยัน ✨', cancelButtonText: 'Cancel' })
+    .then((r) => { if(r.isConfirmed) { 
+        db.ref('banned_codes/'+c).set(true); 
+        db.ref('custom_codes/'+c).remove(); 
+        db.ref('online_users/'+c).remove(); 
+        Swal.fire({ title: 'แบนสำเร็จ!', icon: 'success', timer: 800, showConfirmButton: false });
+    }});
+}
 
-window.saveNewDays = (c) => {
-    const days = document.getElementById(`input-${c}`).value;
-    db.ref('custom_codes/'+c).once('value', s => {
-        let cur = s.val() ? s.val().expireAt : Date.now();
-        // ถ้าเดิมเป็นถาวร หรือหมดอายุไปแล้ว ให้เริ่มนับจากเวลาปัจจุบัน
-        if(cur >= 3000000000000 || cur < Date.now()) cur = Date.now();
-        db.ref('custom_codes/'+c).update({ expireAt: cur + (parseInt(days)*24*60*60*1000) });
-        document.getElementById(`box-${c}`).style.display = 'none';
-        Swal.fire('เพิ่มวันสำเร็จ! 🗓️', '', 'success');
-    });
-};
+function popAddDays(c) {
+    Swal.fire({ title: 'ระบุจำนวนวัน 🌿', input: 'number', inputValue: 30, showCancelButton: true, confirmButtonText: 'ยืนยัน ✨' })
+    .then((r) => { if(r.isConfirmed && r.value) {
+        db.ref('custom_codes/'+c).once('value', s => {
+            let cur = (s.val() && s.val().expireAt > Date.now()) ? s.val().expireAt : Date.now();
+            db.ref('custom_codes/'+c).update({ expireAt: cur + (r.value*86400000) });
+        });
+    }});
+}
 
-window.togglePermanent = (c, isP) => { 
-    Swal.fire({
-        title: isP ? 'ยกเลิกถาวร?' : 'ตั้งค่าเป็นถาวร ♾️',
-        text: isP ? 'ต้องการเปลี่ยนเป็นแบบรายวัน (30 วัน)?' : 'รหัสนี้จะใช้งานได้ตลอดไปเลยนะ?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#fce4ec',
-        confirmButtonText: 'ยืนยัน ✨',
-        borderRadius: '25px'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            db.ref('custom_codes/'+c).update({ expireAt: isP ? Date.now() + (30*24*60*60*1000) : PERM_VAL });
-        }
-    });
-};
+function popPerm(c, isP) {
+    Swal.fire({ title: isP ? 'ยกเลิกถาวร?' : 'ตั้งค่ารหัสถาวร?', showCancelButton: true, confirmButtonText: 'ยืนยัน ✨' })
+    .then((r) => { if(r.isConfirmed) db.ref('custom_codes/'+c).update({ expireAt: isP ? Date.now()+(30*86400000) : PERM_VAL }); });
+}
+
+function popUnban(c) {
+    Swal.fire({ title: 'ปลดแบนรหัสนี้?', showCancelButton: true, confirmButtonText: 'ปลดแบน 🔓' })
+    .then((r) => { if(r.isConfirmed) { db.ref('banned_codes/'+c).remove(); db.ref('custom_codes/'+c).set({ expireAt: Date.now()+(30*86400000) }); }});
+}
 
 checkAuth();
 </script>
