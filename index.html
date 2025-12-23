@@ -149,7 +149,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 const ADMIN_PASS = "adminwinjuniorkmcn0602";
-const PERM_VAL = 32503680000000; // ค่าสำหรับถาวร
+const PERM_VAL = 32503680000000; 
 const USER_CODES = ["winju0101","juwin0202","jujuwin0303","lekwinju0404","winlek0505","jueiei0606","juny0707","niorwin0808","winnior0909","winarrai1010","lnwwinju1111","julnwwin1212","asdf1313","zxcv1414","qwer1616","popo1717","ziber1818","fahsai1919","kaimook2020","rich9999","gold8888","lucky789","money168","winwin24","star555","smile11","power88","bestwin9","junior007"];
 
 function doLogin() { if(document.getElementById("userPass").value === ADMIN_PASS) { sessionStorage.setItem("isAdminActive", "true"); checkAuth(); } else { alert("รหัสผ่านไม่ถูกต้อง!"); } }
@@ -166,23 +166,31 @@ function loadData() {
         customTbody.innerHTML = "";
         Object.keys(custom).sort().forEach(code => {
             const exp = custom[code].expireAt;
-            const isPerm = exp >= 3000000000000; // ตรวจสอบว่าเป็นแบบถาวรหรือไม่ (ใช้ค่าที่มากกว่าปี 2090)
+            const isPerm = exp >= 3000000000000; 
             
             let statusHTML = "";
             if (isPerm) {
-                // แก้ไขให้หน้าแอดมินแสดง ♾️ถาวร♾️
                 statusHTML = '<span style="color:#7b1fa2; font-weight:bold;">♾️ ถาวร ♾️</span>';
             } else {
-                const diffTime = exp - Date.now();
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                const dateString = new Date(exp).toLocaleDateString('th-TH', {
-                    day: '2-digit', month: '2-digit', year: '2-digit'
-                });
+                const now = Date.now();
+                const diffTime = exp - now;
 
-                if (diffDays > 0) {
-                    statusHTML = `เหลือ <span style="color:#2e7d32; font-weight:bold;">${diffDays} วัน</span><br>` + 
-                                 `<small style="color:#666;">(ใช้ได้ถึง ${dateString})</small>`;
+                if (diffTime > 0) {
+                    // คำนวณ วัน ชั่วโมง นาที
+                    const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const mins = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+
+                    const dateString = new Date(exp).toLocaleDateString('th-TH', {
+                        day: '2-digit', month: '2-digit', year: '2-digit'
+                    });
+
+                    statusHTML = `เหลือ <span style="color:#2e7d32; font-weight:bold;">${days} วัน ${hours} ชม. ${mins} นาที</span><br>` + 
+                                 `<small style="color:#666;">(ถึงวันที่ ${dateString})</small>`;
                 } else {
+                    const dateString = new Date(exp).toLocaleDateString('th-TH', {
+                        day: '2-digit', month: '2-digit', year: '2-digit'
+                    });
                     statusHTML = `<span style="color:#c62828; font-weight:bold;">❌ หมดอายุแล้ว</span><br>` +
                                  `<small style="color:#666;">(${dateString})</small>`;
                 }
@@ -233,6 +241,7 @@ window.addNewCode = (isP) => {
     if(!code) return alert("ใส่ชื่อรหัสด้วยนะจ๊ะ");
     const exp = isP ? PERM_VAL : Date.now() + (30*24*60*60*1000);
     db.ref('custom_codes/'+code).set({ expireAt: exp });
+    document.getElementById("newCodeInput").value = "";
 };
 
 window.deleteCode = (c) => { 
@@ -269,6 +278,7 @@ window.saveNewDays = (c) => {
     const days = document.getElementById(`input-${c}`).value;
     db.ref('custom_codes/'+c).once('value', s => {
         let cur = s.val() ? s.val().expireAt : Date.now();
+        // ถ้าเดิมเป็นถาวร หรือหมดอายุไปแล้ว ให้เริ่มนับจากเวลาปัจจุบัน
         if(cur >= 3000000000000 || cur < Date.now()) cur = Date.now();
         db.ref('custom_codes/'+c).update({ expireAt: cur + (parseInt(days)*24*60*60*1000) });
         document.getElementById(`box-${c}`).style.display = 'none';
@@ -279,7 +289,7 @@ window.saveNewDays = (c) => {
 window.togglePermanent = (c, isP) => { 
     Swal.fire({
         title: isP ? 'ยกเลิกถาวร?' : 'ตั้งค่าเป็นถาวร ♾️',
-        text: isP ? 'ต้องการเปลี่ยนเป็นแบบรายวัน?' : 'รหัสนี้จะใช้งานได้ตลอดไปเลยนะ?',
+        text: isP ? 'ต้องการเปลี่ยนเป็นแบบรายวัน (30 วัน)?' : 'รหัสนี้จะใช้งานได้ตลอดไปเลยนะ?',
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#fce4ec',
