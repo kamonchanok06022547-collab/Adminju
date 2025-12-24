@@ -18,7 +18,6 @@
             --offline-gray: #bdc3c7;
         }
 
-        /* SweetAlert Style */
         .swal2-popup { border-radius: 25px !important; padding: 2em !important; width: 340px !important; }
         .swal2-title { color: #444 !important; font-size: 1.5rem !important; font-weight: bold !important; }
         .swal2-confirm { border-radius: 12px !important; padding: 12px 20px !important; font-weight: bold !important; background-color: #3b82f6 !important; }
@@ -27,7 +26,7 @@
         * { box-sizing: border-box; }
         html, body { margin: 0; padding: 0; min-height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--pastel-blue); color: #444; }
         body { display: flex; flex-direction: column; align-items: center; padding: 15px 10px; }
-        .container { width: 100%; max-width: 700px; }
+        .container { width: 100%; max-width: 750px; }
         
         .header-box { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; background: white; padding: 10px 15px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); width: 100%; border: 1px solid #d1e9ff; }
         .header-box img { width: 50px; height: 50px; border-radius: 12px; border: 2px solid var(--primary-blue); object-fit: cover; }
@@ -56,6 +55,7 @@
         button { cursor: pointer; border: none; font-weight: 600; border-radius: 8px; padding: 6px 10px; font-size: 0.7rem; }
         .btn-perm { background: #fdf2f8; color: #db2777; margin-right: 3px; }
         .btn-add { background: #f0fdf4; color: #16a34a; margin-right: 3px; }
+        .btn-set { background: #e0f2f1; color: #00796b; margin-right: 3px; }
         .btn-del { background: #fef2f2; color: #dc2626; }
         .btn-kick { background: #fffde7; color: #fbc02d; margin-right: 5px; }
         .btn-ban { background: #ffebee; color: #c62828; }
@@ -152,7 +152,6 @@ function checkAuth() { if(sessionStorage.getItem("isAdminActive") === "true") { 
 function formatThaiDate(ts) {
     if (ts >= 3000000000000) return "ไม่มีวันหมดอายุ";
     const d = new Date(ts);
-    // แสดงเป็น วัน/เดือน/ปีพ.ศ. ย่อ (ปีค.ศ. + 43)
     return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getFullYear() + 43).slice(-2)}`;
 }
 
@@ -163,7 +162,6 @@ function loadData() {
         const online = data.online_users || {};
         const banned = data.banned_codes || {};
         
-        // 1. ตารางออนไลน์ (ชื่อหายทันทีเมื่อลบ/แบน)
         const onlineTbody = document.getElementById("onlineListTbody");
         onlineTbody.innerHTML = "";
         Object.keys(online).forEach(key => {
@@ -185,7 +183,6 @@ function loadData() {
             }
         });
 
-        // 2. สถานะ Grid
         const grid = document.getElementById("statusGrid");
         grid.innerHTML = "";
         const allKeys = [...STATUS_LIST, ...Object.keys(custom).filter(k => !STATUS_LIST.includes(k))];
@@ -194,7 +191,6 @@ function loadData() {
             grid.innerHTML += `<div class="status-item ${isOnline ? 'status-online' : ''}">${code}</div>`;
         });
 
-        // 3. รหัสลูกค้าใหม่ (แสดงเวลาเหลือแบบละเอียด + วันที่หมดอายุ)
         const newTbody = document.getElementById("newCodesTbody");
         newTbody.innerHTML = "";
         Object.keys(custom).sort().forEach(code => {
@@ -211,8 +207,8 @@ function loadData() {
                         const d = Math.floor(diff / 86400000);
                         const h = Math.floor((diff % 86400000) / 3600000);
                         const m = Math.floor((diff % 3600000) / 60000);
-                        statusHTML = `<span style="color:#2e7d32; font-weight:bold;">เหลือ ${d} วัน ${h} ชม. ${m} นาที</span><br>
-                                      <small style="color:#888;">(ใช้ได้ถึงวันที่ ${formatThaiDate(exp)})</small>`;
+                        statusHTML = `<span style="color:#2e7d32; font-weight:bold;">เหลือ ${d} วัน ${h} ชม.</span><br>
+                                      <small style="color:#888;">(${formatThaiDate(exp)})</small>`;
                     } else {
                         statusHTML = "<span style='color:grey;'>หมดอายุ</span>";
                     }
@@ -222,15 +218,15 @@ function loadData() {
                     <td><b>${code}</b></td>
                     <td>${statusHTML}</td>
                     <td align="right">
-                        <button class="btn-perm" onclick="popPerm('${code}', ${isPerm})">♾️ ถาวร</button>
+                        <button class="btn-perm" onclick="popPerm('${code}', ${isPerm})">♾️</button>
                         <button class="btn-add" onclick="popAddDays('${code}')">🌿 เพิ่ม</button>
-                        <button class="btn-del" onclick="popDelete('${code}')">🗑️ ลบ</button>
+                        <button class="btn-set" onclick="popSetDays('${code}')">⚙️ ปรับ</button>
+                        <button class="btn-del" onclick="popDelete('${code}')">🗑️</button>
                     </td>
                 </tr>`;
             }
         });
 
-        // 4. รายการแบน
         const banTbody = document.getElementById("bannedListTbody");
         banTbody.innerHTML = "";
         Object.keys(banned).forEach(c => {
@@ -272,13 +268,31 @@ function popBan(c) {
     }});
 }
 
+// ฟังก์ชัน "เพิ่มวัน" เดิม (บวกจากของเก่า)
 function popAddDays(c) {
-    Swal.fire({ title: 'ระบุจำนวนวัน 🌿', input: 'number', inputValue: 30, showCancelButton: true, confirmButtonText: 'ยืนยัน ✨' })
+    Swal.fire({ title: 'ระบุจำนวนวันที่จะบวกเพิ่ม 🌿', input: 'number', inputValue: 30, showCancelButton: true, confirmButtonText: 'ยืนยัน ✨' })
     .then((r) => { if(r.isConfirmed && r.value) {
         db.ref('custom_codes/'+c).once('value', s => {
             let cur = (s.val() && s.val().expireAt > Date.now()) ? s.val().expireAt : Date.now();
-            db.ref('custom_codes/'+c).update({ expireAt: cur + (r.value*86400000) });
+            db.ref('custom_codes/'+c).update({ expireAt: cur + (parseFloat(r.value)*86400000) });
         });
+    }});
+}
+
+// ฟังก์ชัน "ปรับวัน" ใหม่ (ตั้งค่าใหม่เลย ไม่สนของเดิม)
+function popSetDays(c) {
+    Swal.fire({ 
+        title: 'ตั้งค่าวันที่เหลือใหม่ ⚙️', 
+        text: 'รหัสจะเหลือจำนวนวันตามที่ระบุ (นับจากตอนนี้)',
+        input: 'number', 
+        inputValue: 1, 
+        showCancelButton: true, 
+        confirmButtonText: 'ตั้งค่า ✨' 
+    })
+    .then((r) => { if(r.isConfirmed && r.value !== "") {
+        const newExpire = Date.now() + (parseFloat(r.value) * 86400000);
+        db.ref('custom_codes/'+c).update({ expireAt: newExpire });
+        Swal.fire({ icon: 'success', title: 'ปรับปรุงแล้ว', timer: 800, showConfirmButton: false });
     }});
 }
 
