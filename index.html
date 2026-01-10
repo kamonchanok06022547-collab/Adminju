@@ -35,22 +35,15 @@
         .card { background: #fff; border-radius: 20px; padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #d1e9ff; }
         .card h3 { margin: 0 0 12px 0; font-size: 1rem; color: var(--primary-blue); border-bottom: 2px solid #f0f4f8; padding-bottom: 8px; }
         
-        .grid-status { display: grid; grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 6px; margin-top: 5px; }
-        .status-item { padding: 8px 2px; border: 1px solid #eee; border-radius: 12px; text-align: center; font-size: 0.65rem; font-weight: bold; color: #888; background: #fafafa; }
-        .status-online { background-color: #e8f5e9; border-color: #4caf50; color: #2e7d32; box-shadow: 0 0 8px rgba(76,175,80,0.3); }
-
-        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
-        .dot-online { background-color: var(--vivid-green); box-shadow: 0 0 8px var(--vivid-green); }
-        .dot-offline { background-color: var(--offline-gray); }
-
-        .create-box { display: flex; flex-direction: column; gap: 8px; }
-        .create-box input { padding: 12px; border-radius: 12px; border: 1.5px solid #eee; outline: none; }
+        .create-box { display: flex; flex-direction: column; gap: 10px; }
+        .create-box input { padding: 12px; border-radius: 12px; border: 1.5px solid #eee; outline: none; text-align: center; }
         .create-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .btn-new-30 { background: #ce93d8; color: white; padding: 10px; border-radius: 10px; font-weight: bold; border:none; cursor: pointer; }
-        .btn-new-perm { background: #4fc3f7; color: white; padding: 10px; border-radius: 10px; font-weight: bold; border:none; cursor: pointer; }
+        .btn-new-30 { background: #ce93d8; color: white; padding: 12px; border-radius: 10px; font-weight: bold; border:none; cursor: pointer; }
+        .btn-new-perm { background: #4fc3f7; color: white; padding: 12px; border-radius: 10px; font-weight: bold; border:none; cursor: pointer; }
 
         table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
         td { padding: 10px 8px; border-bottom: 1px solid #f9f9f9; vertical-align: middle; }
+        th { text-align: left; color: #888; font-size: 0.7rem; padding-bottom: 5px; border-bottom: 2px solid #eee; }
 
         button { cursor: pointer; border: none; font-weight: 600; border-radius: 8px; padding: 6px 10px; font-size: 0.7rem; }
         .btn-perm { background: #fdf2f8; color: #db2777; margin-right: 3px; }
@@ -59,10 +52,12 @@
         .btn-del { background: #fef2f2; color: #dc2626; }
         .btn-kick { background: #fffde7; color: #fbc02d; margin-right: 5px; }
         .btn-ban { background: #ffebee; color: #c62828; }
-        .btn-unban { background: #e8f5e9; color: #2e7d32; }
 
         #loginOverlay { position: fixed; inset: 0; background: #e3f2fd; display: flex; align-items: center; justify-content: center; z-index: 1000; }
         .login-card { background: white; width: 85%; max-width: 320px; padding: 25px; border-radius: 25px; text-align: center; }
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
+        .dot-online { background-color: var(--vivid-green); box-shadow: 0 0 8px var(--vivid-green); }
+        .dot-offline { background-color: var(--offline-gray); }
     </style>
 </head>
 <body>
@@ -71,7 +66,8 @@
     <div class="login-card">
         <img src="https://i.pinimg.com/1200x/7a/82/11/7a8211a2161799550aa868aaab6d5c84.jpg" style="width:100px; height:100px; object-fit:cover; border-radius:20px; margin-bottom:15px; border: 3px solid #1565c0;">
         <h3>Admin Login</h3>
-        <input id="userPass" type="password" placeholder="รหัสผ่านแอดมิน" style="width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border:1px solid #ddd; text-align:center;">
+        <input id="adminUser" type="text" placeholder="ชื่อผู้ใช้แอดมิน" style="width:100%; padding:12px; margin-bottom:10px; border-radius:12px; border:1px solid #ddd; text-align:center;">
+        <input id="adminPass" type="password" placeholder="รหัสผ่านแอดมิน" style="width:100%; padding:12px; margin-bottom:12px; border-radius:12px; border:1px solid #ddd; text-align:center;">
         <button onclick="doLogin()" style="background: var(--primary-blue); color:white; width:100%; padding:12px; border-radius:12px; border:none; font-weight:bold;">เข้าสู่ระบบ ✨</button>
     </div>
 </div>
@@ -81,47 +77,39 @@
         <img src="https://i.pinimg.com/1200x/7a/82/11/7a8211a2161799550aa868aaab6d5c84.jpg" alt="Admin">
         <div>
             <h2>ADMIN MONITOR</h2>
-            <small style="color: #888;">Real-time System Control</small>
+            <small style="color: #888;">จัดการชื่อผู้ใช้และรหัสผ่าน</small>
         </div>
     </div>
 
     <div class="card">
-        <h3>✨ สร้างรหัสลูกค้าใหม่</h3>
+        <h3>✨ สร้างยูสเซอร์ใหม่</h3>
         <div class="create-box">
-            <input id="newCodeInput" type="text" placeholder="พิมพ์ชื่อรหัส...">
+            <input id="newUsername" type="text" placeholder="ตั้งชื่อผู้ใช้งาน (Username)">
+            <input id="newPassword" type="text" placeholder="ตั้งรหัสผ่าน (Password)">
             <div class="create-btns">
-                <button class="btn-new-30" onclick="addNewCode(false)">📞New 30day📞</button>
-                <button class="btn-new-perm" onclick="addNewCode(true)">♾️ ถาวร♾️</button>
+                <button class="btn-new-30" onclick="addNewCode(false)">📞 30 วัน</button>
+                <button class="btn-new-perm" onclick="addNewCode(true)">♾️ ถาวร</button>
             </div>
         </div>
     </div>
 
     <div class="card">
-        <h3>🌟 🟢 สถานะออนไลน์เรียลไทม์</h3>
-        <div id="statusGrid" class="grid-status"></div>
-    </div>
-
-    <div class="card">
-        <h3>👥 ยูสเซอร์ที่ออนไลน์ (Real-time)</h3>
+        <h3>👥 ออนไลน์ตอนนี้</h3>
         <table>
             <thead>
-                <tr><th width="30"></th><th>รหัส</th><th>ชื่อ/อุปกรณ์</th><th align="right">จัดการ</th></tr>
+                <tr><th width="30"></th><th>ชื่อผู้เล่น</th><th>รหัสที่ใช้</th><th align="right">จัดการ</th></tr>
             </thead>
             <tbody id="onlineListTbody"></tbody>
         </table>
     </div>
 
     <div class="card">
-        <h3>✨ รหัสลูกค้าใหม่ ✨</h3>
+        <h3>✨ รายชื่อยูสเซอร์ในระบบ</h3>
         <table>
+            <thead>
+                <tr><th>User / Pass</th><th>วันหมดอายุ</th><th align="right">จัดการ</th></tr>
+            </thead>
             <tbody id="newCodesTbody"></tbody>
-        </table>
-    </div>
-
-    <div class="card" id="bannedCard" style="border: 1px solid #ffcdd2;">
-        <h3 style="color: #c62828;">🚫 รายการรหัสที่ถูกแบน</h3>
-        <table>
-            <tbody id="bannedListTbody"></tbody>
         </table>
     </div>
 
@@ -129,6 +117,7 @@
 </div>
 
 <script>
+// --- CONFIG FIREBASE ---
 const firebaseConfig = {
     apiKey: "AIzaSyC1iAT_0vKk6Uew2VJtN3_wx4JszVTTTjY",
     authDomain: "junior-nior.firebaseapp.com",
@@ -141,13 +130,36 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const ADMIN_PASS = "adminwinjuniorkmcn0602";
-const PERM_VAL = 32503680000000;
-const STATUS_LIST = ["asdf1313", "bestwin9", "fahsai1919", "gold8888", "jueiei0606", "jujuwin0303", "julnwwin1212", "junior007", "juny0707", "juwin0202", "kaimook2020", "lekwinju0404", "lnwwinju1111", "lucky789", "money168", "niorwin0808", "popo1717", "power88", "qwer1616", "rich9999", "smile11", "star555", "winarrai1010", "winju0101", "winlek0505", "winnior0909", "winwin24", "ziber1818", "zxcv1414"];
+// --- ADMIN LOGIN CONFIG ---
+const MASTER_USER = "adminwin"; 
+const MASTER_PASS = "adminwinjuniorkmcn0602";
+const PERM_VAL = 32503680000000; // ค่าคงที่สำหรับวันถาวร
 
-function doLogin() { if(document.getElementById("userPass").value === ADMIN_PASS) { sessionStorage.setItem("isAdminActive", "true"); checkAuth(); } else { Swal.fire('รหัสผ่านไม่ถูกต้อง', '', 'error'); } }
-function doLogout() { sessionStorage.clear(); location.reload(); }
-function checkAuth() { if(sessionStorage.getItem("isAdminActive") === "true") { document.getElementById("loginOverlay").style.display = "none"; document.getElementById("main").style.display = "block"; loadData(); } }
+function doLogin() {
+    const u = document.getElementById("adminUser").value;
+    const p = document.getElementById("adminPass").value;
+    if(u === MASTER_USER && p === MASTER_PASS) {
+        sessionStorage.setItem("adminLoggedIn", "true");
+        checkAuth();
+    } else {
+        Swal.fire('ข้อมูลไม่ถูกต้อง', 'กรุณาตรวจสอบชื่อและรหัสผ่าน', 'error');
+    }
+}
+
+function checkAuth() {
+    if(sessionStorage.getItem("adminLoggedIn") === "true") {
+        document.getElementById("loginOverlay").style.display = "none";
+        document.getElementById("main").style.display = "block";
+        loadData();
+    }
+}
+
+function doLogout() {
+    sessionStorage.clear();
+    location.reload();
+}
+
+// --- การจัดการข้อมูล ---
 
 function formatThaiDate(ts) {
     if (ts >= 3000000000000) return "ไม่มีวันหมดอายุ";
@@ -160,150 +172,98 @@ function loadData() {
         const data = snapshot.val() || {};
         const custom = data.custom_codes || {};
         const online = data.online_users || {};
-        const banned = data.banned_codes || {};
         
+        // 1. แสดงคนออนไลน์
         const onlineTbody = document.getElementById("onlineListTbody");
         onlineTbody.innerHTML = "";
         Object.keys(online).forEach(key => {
-            const isExist = custom[key] !== undefined || STATUS_LIST.includes(key);
-            const isBanned = banned[key] !== undefined;
-            if (isExist && !isBanned) {
-                const user = online[key];
+            const user = online[key];
+            if(user.status === 'online') {
                 onlineTbody.innerHTML += `<tr>
-                    <td align="center"><span class="status-dot ${user.status === 'online' ? 'dot-online' : 'dot-offline'}"></span></td>
-                    <td><b>${key}</b></td>
-                    <td><span style="color:#666;">${user.name || '-'}</span></td>
+                    <td align="center"><span class="status-dot dot-online"></span></td>
+                    <td><b>${user.name || 'ไม่ทราบชื่อ'}</b></td>
+                    <td><small>${user.pass}</small></td>
                     <td align="right">
-                        <button class="btn-kick" onclick="popKick('${key}')">🐾 เตะ</button>
-                        <button class="btn-ban" onclick="popBan('${key}')">🤬 แบน</button>
+                        <button class="btn-kick" onclick="popKick('${key}')">เตะ</button>
                     </td>
                 </tr>`;
-            } else {
-                db.ref('online_users/' + key).remove();
             }
         });
 
-        const grid = document.getElementById("statusGrid");
-        grid.innerHTML = "";
-        const allKeys = [...STATUS_LIST, ...Object.keys(custom).filter(k => !STATUS_LIST.includes(k))];
-        allKeys.forEach(code => {
-            const isOnline = online[code] && online[code].status === 'online';
-            grid.innerHTML += `<div class="status-item ${isOnline ? 'status-online' : ''}">${code}</div>`;
-        });
-
+        // 2. แสดงรายการ User ทั้งหมด
         const newTbody = document.getElementById("newCodesTbody");
         newTbody.innerHTML = "";
-        Object.keys(custom).sort().forEach(code => {
-            if (!STATUS_LIST.includes(code) || ["1123asdf", "kaophod11", "tommy40", "zzxx123"].includes(code)) {
-                const exp = custom[code].expireAt;
-                const isPerm = exp >= 3000000000000;
-                let statusHTML = "";
-
-                if (isPerm) {
-                    statusHTML = "<b style='color:#db2777;'>♾️ ถาวร</b>";
+        Object.keys(custom).forEach(id => {
+            const item = custom[id];
+            const exp = item.expireAt;
+            const isPerm = exp >= 3000000000000;
+            
+            let statusHTML = "";
+            if (isPerm) {
+                statusHTML = "<b style='color:#db2777;'>ถาวร</b>";
+            } else {
+                const diff = exp - Date.now();
+                if (diff > 0) {
+                    const days = Math.floor(diff / 86400000);
+                    statusHTML = `<span style="color:#2e7d32;">เหลือ ${days} วัน</span><br><small>${formatThaiDate(exp)}</small>`;
                 } else {
-                    const diff = exp - Date.now();
-                    if (diff > 0) {
-                        const d = Math.floor(diff / 86400000);
-                        const h = Math.floor((diff % 86400000) / 3600000);
-                        const m = Math.floor((diff % 3600000) / 60000);
-                        statusHTML = `<span style="color:#2e7d32; font-weight:bold;">เหลือ ${d} วัน ${h} ชม.</span><br>
-                                      <small style="color:#888;">(${formatThaiDate(exp)})</small>`;
-                    } else {
-                        statusHTML = "<span style='color:grey;'>หมดอายุ</span>";
-                    }
+                    statusHTML = "<span style='color:grey;'>หมดอายุ</span>";
                 }
-
-                newTbody.innerHTML += `<tr>
-                    <td><b>${code}</b></td>
-                    <td>${statusHTML}</td>
-                    <td align="right">
-                        <button class="btn-perm" onclick="popPerm('${code}', ${isPerm})">♾️</button>
-                        <button class="btn-add" onclick="popAddDays('${code}')">🌿 เพิ่ม</button>
-                        <button class="btn-set" onclick="popSetDays('${code}')">⚙️ ปรับ</button>
-                        <button class="btn-del" onclick="popDelete('${code}')">🗑️</button>
-                    </td>
-                </tr>`;
             }
-        });
 
-        const banTbody = document.getElementById("bannedListTbody");
-        banTbody.innerHTML = "";
-        Object.keys(banned).forEach(c => {
-            banTbody.innerHTML += `<tr><td><b style="color:red;">🚫 ${c}</b></td><td align="right"><button class="btn-unban" onclick="popUnban('${c}')">🔓 ปลด</button></td></tr>`;
+            newTbody.innerHTML += `<tr>
+                <td><b>${item.username || 'N/A'}</b><br><small style="color:#1565c0;">Pass: ${item.password}</small></td>
+                <td>${statusHTML}</td>
+                <td align="right">
+                    <button class="btn-add" onclick="popAddDays('${id}')">+</button>
+                    <button class="btn-del" onclick="popDelete('${id}')">🗑️</button>
+                </td>
+            </tr>`;
         });
     });
 }
 
 function addNewCode(isP) {
-    const code = document.getElementById("newCodeInput").value.trim();
-    if(!code) return;
-    db.ref('custom_codes/'+code).set({ expireAt: isP ? PERM_VAL : Date.now()+(30*86400000) });
-    document.getElementById("newCodeInput").value = "";
-    Swal.fire({ icon: 'success', title: 'สร้างสำเร็จ', timer: 800, showConfirmButton: false });
+    const u = document.getElementById("newUsername").value.trim();
+    const p = document.getElementById("newPassword").value.trim();
+    
+    if(!u || !p) {
+        Swal.fire('เตือน', 'กรุณากรอกทั้ง User และ Pass', 'warning');
+        return;
+    }
+
+    // ใช้ Password เป็น Key ในการเก็บข้อมูลเพื่อให้ง่ายต่อการค้นหาตอน Login หน้าบ้าน
+    db.ref('custom_codes/' + p).set({
+        username: u,
+        password: p,
+        expireAt: isP ? PERM_VAL : Date.now() + (30 * 86400000)
+    }).then(() => {
+        document.getElementById("newUsername").value = "";
+        document.getElementById("newPassword").value = "";
+        Swal.fire({ icon: 'success', title: 'สร้างสำเร็จ', timer: 800, showConfirmButton: false });
+    });
 }
 
-function popKick(c) {
-    Swal.fire({ title: 'เตะผู้ใช้?', text: 'ผู้ใช้จะเด้งออกจากระบบ', showCancelButton: true, confirmButtonText: 'ยืนยัน ✨', cancelButtonText: 'Cancel' })
-    .then((r) => { if(r.isConfirmed) db.ref('online_users/'+c).remove(); });
+function popKick(key) {
+    Swal.fire({ title: 'เตะผู้ใช้?', text: 'ผู้ใช้จะถูกออกจากระบบทันที', showCancelButton: true, confirmButtonText: 'ยืนยัน' })
+    .then((r) => { if(r.isConfirmed) db.ref('online_users/' + key).remove(); });
 }
 
-function popDelete(c) {
-    Swal.fire({ title: 'ลบรหัสนี้?', text: 'ข้อมูลจะหายไปถาวรจากฐานข้อมูล', showCancelButton: true, confirmButtonText: 'ยืนยัน ✨', cancelButtonText: 'Cancel' })
-    .then((r) => { if(r.isConfirmed) { 
-        db.ref('custom_codes/'+c).remove(); 
-        db.ref('online_users/'+c).remove(); 
-        db.ref('banned_codes/'+c).remove();
-        Swal.fire({ title: 'ลบเรียบร้อย!', icon: 'success', timer: 800, showConfirmButton: false });
-    }});
+function popDelete(id) {
+    Swal.fire({ title: 'ลบยูสเซอร์?', text: 'ข้อมูลจะหายไปถาวร', showCancelButton: true, confirmButtonText: 'ลบเลย' })
+    .then((r) => { if(r.isConfirmed) db.ref('custom_codes/' + id).remove(); });
 }
 
-function popBan(c) {
-    Swal.fire({ title: 'แบนรหัสนี้?', text: 'รหัสจะเข้าใช้งานไม่ได้จนกว่าจะปลดแบน', showCancelButton: true, confirmButtonText: 'ยืนยัน ✨', cancelButtonText: 'Cancel' })
-    .then((r) => { if(r.isConfirmed) { 
-        db.ref('banned_codes/'+c).set(true); 
-        db.ref('custom_codes/'+c).remove(); 
-        db.ref('online_users/'+c).remove(); 
-        Swal.fire({ title: 'แบนสำเร็จ!', icon: 'success', timer: 800, showConfirmButton: false });
-    }});
-}
-
-// ฟังก์ชัน "เพิ่มวัน" เดิม (บวกจากของเก่า)
-function popAddDays(c) {
-    Swal.fire({ title: 'ระบุจำนวนวันที่จะบวกเพิ่ม 🌿', input: 'number', inputValue: 30, showCancelButton: true, confirmButtonText: 'ยืนยัน ✨' })
-    .then((r) => { if(r.isConfirmed && r.value) {
-        db.ref('custom_codes/'+c).once('value', s => {
-            let cur = (s.val() && s.val().expireAt > Date.now()) ? s.val().expireAt : Date.now();
-            db.ref('custom_codes/'+c).update({ expireAt: cur + (parseFloat(r.value)*86400000) });
-        });
-    }});
-}
-
-// ฟังก์ชัน "ปรับวัน" ใหม่ (ตั้งค่าใหม่เลย ไม่สนของเดิม)
-function popSetDays(c) {
-    Swal.fire({ 
-        title: 'ตั้งค่าวันที่เหลือใหม่ ⚙️', 
-        text: 'รหัสจะเหลือจำนวนวันตามที่ระบุ (นับจากตอนนี้)',
-        input: 'number', 
-        inputValue: 1, 
-        showCancelButton: true, 
-        confirmButtonText: 'ตั้งค่า ✨' 
-    })
-    .then((r) => { if(r.isConfirmed && r.value !== "") {
-        const newExpire = Date.now() + (parseFloat(r.value) * 86400000);
-        db.ref('custom_codes/'+c).update({ expireAt: newExpire });
-        Swal.fire({ icon: 'success', title: 'ปรับปรุงแล้ว', timer: 800, showConfirmButton: false });
-    }});
-}
-
-function popPerm(c, isP) {
-    Swal.fire({ title: isP ? 'ยกเลิกถาวร?' : 'ตั้งค่ารหัสถาวร?', showCancelButton: true, confirmButtonText: 'ยืนยัน ✨' })
-    .then((r) => { if(r.isConfirmed) db.ref('custom_codes/'+c).update({ expireAt: isP ? Date.now()+(30*86400000) : PERM_VAL }); });
-}
-
-function popUnban(c) {
-    Swal.fire({ title: 'ปลดแบนรหัสนี้?', showCancelButton: true, confirmButtonText: 'ปลดแบน 🔓' })
-    .then((r) => { if(r.isConfirmed) { db.ref('banned_codes/'+c).remove(); db.ref('custom_codes/'+c).set({ expireAt: Date.now()+(30*86400000) }); }});
+function popAddDays(id) {
+    Swal.fire({ title: 'เพิ่มจำนวนวัน', input: 'number', inputValue: 30, showCancelButton: true })
+    .then((r) => {
+        if(r.isConfirmed && r.value) {
+            db.ref('custom_codes/' + id).once('value', s => {
+                let cur = (s.val() && s.val().expireAt > Date.now()) ? s.val().expireAt : Date.now();
+                db.ref('custom_codes/' + id).update({ expireAt: cur + (parseFloat(r.value) * 86400000) });
+            });
+        }
+    });
 }
 
 checkAuth();
